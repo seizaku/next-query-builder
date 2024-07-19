@@ -6,14 +6,20 @@ import { CustomQueryBuilder } from "./_components/query-builder";
 import { Query } from "./_components/query";
 
 async function fetchData() {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users`);
+  try {
+    const res = await fetch(
+      `https://seizaku-query-builder.vercel.app/api/users`,
+    );
 
-  if (!res.ok) {
-    // This will activate the closest `error.js` Error Boundary
-    throw new Error("Failed to fetch data");
+    if (!res.ok) {
+      throw new Error(`HTTP error! status: ${res.status}`);
+    }
+
+    return res.json() as Promise<{ data: User[] }>;
+  } catch (error) {
+    console.error("Failed to fetch data:", error);
+    throw error;
   }
-
-  return res.json() as Promise<{ data: User[] }>;
 }
 
 export default async function Home() {
