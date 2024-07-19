@@ -5,11 +5,11 @@ import { Button } from "@/components/ui/button";
 import { CustomQueryBuilder } from "./_components/query-builder";
 import { Query } from "./_components/query";
 
+export const runtime = "edge";
+
 async function fetchData() {
   try {
-    const res = await fetch(
-      `https://seizaku-query-builder.vercel.app/api/users`,
-    );
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users`);
 
     if (!res.ok) {
       throw new Error(`HTTP error! status: ${res.status}`);
