@@ -25,7 +25,7 @@ export default async function Home() {
       <section>
         <h1 className="py-2 text-xl font-bold">Users</h1>
         <h6 className="mb-4 text-xs font-medium text-muted-foreground">
-          {user.data.length} Users
+          {user.data.length} Total Users
         </h6>
         <CustomQueryBuilder />
       </section>
