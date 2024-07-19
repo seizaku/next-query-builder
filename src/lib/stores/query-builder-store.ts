@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { fields, getOperators } from "@/app/(root)/_components/query-builder";
+import { fields, getOperators } from "@/app/_components/query-builder";
 
 type QueryStoreProps = {
   query?: any;
