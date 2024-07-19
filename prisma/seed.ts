@@ -45,7 +45,7 @@ async function main() {
             state: data.state,
             city: data.city,
             age: data.age,
-            sex: data.sex[0].toUpperCase() + data.sex.slice(1),
+            sex: data.sex[0].toUpperCase() + data.sex.slice as "Male" | "Female",
           }
         },
         createdAt: data.createdAt,
