@@ -1,4 +1,3 @@
-import { RuleGroupType } from "react-querybuilder";
 import { create } from "zustand";
 import { fields, getOperators } from "@/app/(root)/_components/query-builder";
 
@@ -15,7 +14,7 @@ type QueryStoreProps = {
 export const QueryBuilderStore = create<QueryStoreProps>((set, get) => ({
   query: {
     combinator: "and",
-    rules: [{ field: "name", operator: "=", value: "Steve" }],
+    rules: [],
   },
   addRule: (fieldName) => {
     const field = fields.find((item) => item.name === fieldName);
