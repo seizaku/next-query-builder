@@ -17,7 +17,10 @@ export function createRandomUser() {
     country: faker.location.country(),
     state: faker.location.state(),
     city: faker.location.city(),
-    birthdate: faker.date.birthdate(),
+    sex: faker.person.sex(),
+    age: ((birthdate: Date): number =>
+      new Date().getFullYear() - birthdate.getFullYear() - 
+      (new Date() < new Date(birthdate.setFullYear(new Date().getFullYear())) as any))(faker.date.birthdate()),
     createdAt: faker.date.past(),
     updatedAt: faker.date.future(),
   };
@@ -41,7 +44,8 @@ async function main() {
             country: data.country,
             state: data.state,
             city: data.city,
-            birthDate: data.birthdate,
+            age: data.age,
+            sex: data.sex[0].toUpperCase() + data.sex.slice(1),
           }
         },
         createdAt: data.createdAt,
