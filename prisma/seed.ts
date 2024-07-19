@@ -33,7 +33,7 @@ async function main() {
       data: {
         email: data.email,
         name: data.name,
-        Profile: {
+        profile: {
           create: {
             avatar: data.avatar,
             company: data.company,
