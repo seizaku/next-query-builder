@@ -6,7 +6,7 @@ import { CustomQueryBuilder } from "./_components/query-builder";
 import { Query } from "./_components/query";
 
 async function fetchData() {
-  const res = await fetch(process.env.NEXT_PUBLIC_API_HOST + "/api/users");
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users`);
 
   if (!res.ok) {
     // This will activate the closest `error.js` Error Boundary
