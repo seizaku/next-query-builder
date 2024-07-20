@@ -9,7 +9,10 @@ async function fetchData() {
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users`);
 
     if (!res.ok) {
-      throw new Error(`HTTP error! status: ${res.status}`);
+      console.error(
+        `HTTP error! status: ${res.status}. API: ${process.env.NEXT_PUBLIC_API_URL}`,
+      );
+      return { data: [] };
     }
 
     return res.json() as Promise<{ data: User[] }>;
