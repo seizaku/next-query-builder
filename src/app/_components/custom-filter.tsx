@@ -99,9 +99,11 @@ export const CustomFilterControl = ({
                 {fields.map((item) => (
                   <Button
                     onClick={() => {
-                      rule
-                        ? setRuleField(ruleIndex!, item.name)
-                        : addRule(item.name);
+                      if (rule) {
+                        setRuleField(ruleIndex!, item.name);
+                      } else {
+                        addRule(item.name);
+                      }
                       setOpen(false);
                     }}
                     key={`filter-item-${item.name}`}
