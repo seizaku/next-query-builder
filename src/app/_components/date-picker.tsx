@@ -82,7 +82,7 @@ export function CustomDateRangePicker({
   rule: RuleType;
   ruleIndex: number;
 }) {
-  const { setRuleValue } = QueryBuilderStore();
+  const { query, setRuleValue } = QueryBuilderStore();
   // Set default date range to 7 days
   const [unit, setUnit] = useState<"hours" | "days" | "weeks" | "months">(
     "days",
@@ -92,11 +92,6 @@ export function CustomDateRangePicker({
     from: subDays(new Date(), 7),
     to: new Date(),
   });
-
-  const isLast =
-    rule.operator == "last" ||
-    rule.operator == "notLast" ||
-    rule.operator == "beforeLast";
 
   async function handleDateChange() {
     switch (unit) {
@@ -134,7 +129,9 @@ export function CustomDateRangePicker({
   useEffect(() => {
     setRuleValue(
       ruleIndex,
-      `${date?.from?.toISOString()},${date?.to?.toISOString()}`,
+      date?.from
+        ? `${date?.from?.toISOString()},${date?.to?.toISOString()}`
+        : undefined,
     );
   }, [date]);
 
@@ -151,7 +148,7 @@ export function CustomDateRangePicker({
             )}
           >
             <CalendarIcon className="mr-2 h-4 w-4" />
-            {date?.from ? (
+            {query?.rules[ruleIndex].value && date?.from ? (
               date.to ? (
                 <>
                   {format(date.from, "LLL dd, y")} -{" "}
@@ -166,34 +163,32 @@ export function CustomDateRangePicker({
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="start">
-          {isLast && (
-            <div className="flex w-1/2 gap-2 p-2">
-              <Input
-                type="number"
-                value={data}
-                min={0}
-                onChange={(e) => {
-                  setData(parseInt(e.currentTarget.value) || 0);
-                  handleDateChange();
-                }}
-              />
-              <Select
-                onValueChange={(value) => {
-                  setUnit(value as "hours" | "days" | "weeks" | "months");
-                }}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Days" defaultValue={"days"} />
-                </SelectTrigger>
-                <SelectContent position="popper">
-                  <SelectItem value="hours">Hours</SelectItem>
-                  <SelectItem value="days">Days</SelectItem>
-                  <SelectItem value="weeks">Weeks</SelectItem>
-                  <SelectItem value="months">Months</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          )}
+          <div className="flex w-1/2 gap-2 p-2">
+            <Input
+              type="number"
+              value={data}
+              min={0}
+              onChange={(e) => {
+                setData(parseInt(e.currentTarget.value) || 0);
+                handleDateChange();
+              }}
+            />
+            <Select
+              onValueChange={(value) => {
+                setUnit(value as "hours" | "days" | "weeks" | "months");
+              }}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Days" defaultValue={"days"} />
+              </SelectTrigger>
+              <SelectContent position="popper">
+                <SelectItem value="hours">Hours</SelectItem>
+                <SelectItem value="days">Days</SelectItem>
+                <SelectItem value="weeks">Weeks</SelectItem>
+                <SelectItem value="months">Months</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           <Calendar
             initialFocus
             mode="range"
