@@ -1,11 +1,8 @@
 import { UserDataTable } from "./_components/data-table";
 import { columns } from "./_components/columns";
 import { User } from "./_components/columns";
-import { Button } from "@/components/ui/button";
 import { CustomQueryBuilder } from "./_components/query-builder";
 import { Query } from "./_components/query";
-
-export const runtime = "edge";
 
 async function fetchData() {
   try {
@@ -31,7 +28,7 @@ export default async function Home() {
       <section>
         <h1 className="py-2 text-xl font-bold">Users</h1>
         <h6 className="mb-4 text-xs font-medium text-muted-foreground">
-          {user.data.length} Total Users
+          {user.data.length} Users
         </h6>
         <CustomQueryBuilder />
       </section>
