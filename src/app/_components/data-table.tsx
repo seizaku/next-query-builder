@@ -18,6 +18,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { UserDataStore } from "@/lib/stores/user-data-store";
+import { TableLoadingSkeleton } from "./table-skeleton";
+import { QueryBuilderStore } from "@/lib/stores/query-builder-store";
 
 interface UserDataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -31,10 +33,14 @@ export function UserDataTable<TData, TValue>({
   const [columnVisibility, setColumnVisibility] = useState({
     profile: false, // Hide profile column
   });
-  const { setUserData } = UserDataStore();
+  const { users, queryResults, setUserData, loading, setLoading } =
+    UserDataStore();
+  const { query } = QueryBuilderStore();
 
   const table = useReactTable({
-    data,
+    data: query.rules.some((item) => item.value?.toString()?.trim() != "")
+      ? queryResults
+      : users, // If there are filters, then display the query results
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -43,6 +49,7 @@ export function UserDataTable<TData, TValue>({
 
   useEffect(() => {
     setUserData(data);
+    setLoading(false);
   }, []);
 
   return (
@@ -66,7 +73,9 @@ export function UserDataTable<TData, TValue>({
             ))}
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows?.length ? (
+            {loading ? (
+              <TableLoadingSkeleton />
+            ) : table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
