@@ -19,8 +19,9 @@ import {
   PopoverContent,
 } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { UserDataStore } from "@/lib/stores/user-data-store";
+import { CustomDatePicker, CustomDateRangePicker } from "./date-picker";
 
 // This contains all the fields that can be queried
 export const fields: Field[] = [
@@ -37,43 +38,43 @@ export const fields: Field[] = [
     inputType: "text",
   },
   {
-    name: "avatar",
+    name: "profile.avatar",
     label: "AvatarURL",
     datatype: "text",
     inputType: "text",
   },
   {
-    name: "company",
+    name: "profile.company",
     label: "Company",
     datatype: "text",
     inputType: "text",
   },
   {
-    name: "age",
+    name: "profile.age",
     label: "Age",
     datatype: "number",
-    inputType: "number",
+    inputType: "text",
   },
   {
-    name: "sex",
+    name: "profile.sex",
     label: "Sex",
     datatype: "text",
     inputType: "text",
   },
   {
-    name: "zipCode",
+    name: "profile.zipCode",
     label: "Zip Code",
     datatype: "text",
     inputType: "text",
   },
   {
-    name: "country",
+    name: "profile.country",
     label: "Country",
     datatype: "text",
     inputType: "text",
   },
   {
-    name: "state",
+    name: "profile.state",
     label: "State",
     datatype: "text",
     inputType: "text",
@@ -116,21 +117,19 @@ export function getOperators(fieldName: string) {
         { name: "<=", label: "Less than or equal to" },
         { name: "between", label: "Between" },
         { name: "notBetween", label: "Not between" },
-        { name: "isNumeric", label: "Is numeric" },
-        { name: "isNotNumeric", label: "Is not numeric" },
       ];
     case "date":
       return [
-        { name: "last", label: "last" },
-        { name: "notLast", label: "not in the last" },
-        { name: "between", label: "between" },
-        { name: "notBetween", label: "not between" },
-        { name: "=", label: "on" },
-        { name: "!=", label: "not on" },
-        { name: "beforeLast", label: "before the last" },
-        { name: "<", label: "before" },
-        { name: "since", label: "since" },
-        { name: "next", label: "in the next" },
+        { name: "last", label: "Last" },
+        { name: "notLast", label: "Not in the last" },
+        { name: "between", label: "Between" },
+        { name: "notBetween", label: "Not between" },
+        { name: "=", label: "On" },
+        { name: "!=", label: "Not on" },
+        { name: "beforeLast", label: "Before the last" },
+        { name: "<", label: "Before" },
+        { name: "since", label: "Since" },
+        { name: "next", label: "In the next" },
       ];
   }
   return defaultOperators;
@@ -139,6 +138,7 @@ export function getOperators(fieldName: string) {
 // Custom query builder
 export function CustomQueryBuilder() {
   const { query } = QueryBuilderStore();
+
   return (
     <div className="rounded-xl border p-4">
       <h1 className="p-2 text-xs font-bold uppercase text-muted-foreground">
@@ -247,19 +247,34 @@ export function RuleInputValue({
   const { setRuleValue } = QueryBuilderStore();
   const field = fields.find((fld) => fld.name === rule.field);
 
-  if (rule.operator == "null" || rule.operator == "notNull") return;
+  if (rule.operator == "null" || rule.operator == "notNull") {
+    setRuleValue(ruleIndex, "");
+    return null;
+  }
 
-  switch (field?.inputType) {
+  switch (field?.datatype) {
     case "text":
       return <CustomSelectValue rule={rule} ruleIndex={ruleIndex} />;
     case "number":
       return (
         <Input
-          type="number"
           onBlur={(e) => setRuleValue(ruleIndex, e.currentTarget.value)}
-          className="w-44"
+          className="w-fit"
         />
       );
+    case "date":
+      const dateRangeOperators = [
+        "between",
+        "notBetween",
+        "last",
+        "notLast",
+        "beforeLast",
+      ];
+      if (dateRangeOperators.includes(rule.operator)) {
+        return <CustomDateRangePicker rule={rule} ruleIndex={ruleIndex} />;
+      } else {
+        return <CustomDatePicker rule={rule} ruleIndex={ruleIndex} />;
+      }
   }
 }
 
@@ -275,7 +290,6 @@ export function CustomSelectValue({
   const [search, setSearchValue] = useState("");
   const { users } = UserDataStore();
   const { setRuleValue } = QueryBuilderStore();
-  const [uniqueValues, setUniqueValues] = useState(undefined);
 
   function handleSelect(item: any) {
     if (typeof item == "string") {
@@ -285,11 +299,15 @@ export function CustomSelectValue({
       return;
     } else {
       setValue(
-        item[rule.field]?.toString() || item["profile"][rule.field] || "",
+        item[rule.field]?.toString() ||
+          item["profile"]?.[rule.field.split(".")?.[1]] ||
+          "",
       );
       setRuleValue(
         ruleIndex,
-        item[rule.field]?.toString() || item["profile"][rule.field] || "",
+        item[rule.field]?.toString() ||
+          item["profile"]?.[rule.field.split(".")?.[1]] ||
+          "",
       );
       setOpen(false);
     }
@@ -319,7 +337,7 @@ export function CustomSelectValue({
           <ScrollArea className="max-h-[320px] w-full">
             <div className="pt-2">
               {/* If the current field selected is Sex, show only two values */}
-              {rule.field == "sex" ? (
+              {rule.field == "profile.sex" ? (
                 <>
                   <Button
                     onClick={() => {
@@ -350,7 +368,7 @@ export function CustomSelectValue({
                         ?.toString()
                         ?.toLowerCase()
                         ?.includes(search) ||
-                      item["profile"]?.[rule.field]
+                      item["profile"]?.[rule.field.split(".")?.[1]]
                         ?.toString()
                         ?.toLowerCase()
                         ?.includes(search),
@@ -365,7 +383,9 @@ export function CustomSelectValue({
                       variant={"ghost"}
                       className="w-full justify-start text-xs font-medium"
                     >
-                      {item[rule.field] || item["profile"]?.[rule.field] || ""}
+                      {item[rule.field] ||
+                        item["profile"]?.[rule.field.split(".")?.[1]] ||
+                        ""}
                     </Button>
                   ))
               )}
