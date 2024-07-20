@@ -68,6 +68,10 @@ export const columns: ColumnDef<User>[] = [
     header: "Sex",
   },
   {
+    accessorKey: "profile.company",
+    header: "Company",
+  },
+  {
     accessorKey: "profile.zipCode",
     header: "Zip Code",
   },
