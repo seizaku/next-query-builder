@@ -16,7 +16,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { RuleType } from "react-querybuilder";
-import { fields } from "./query-builder";
+import { fields } from "@/config/fields";
 import { cn } from "@/lib/utils";
 import { QueryBuilderStore } from "@/lib/stores/query-builder-store";
 import { useState } from "react";
@@ -29,8 +29,10 @@ export const CustomFilterControl = ({
   ruleIndex?: number;
 }) => {
   const [open, setOpen] = useState(false);
-  const { addRule, setRuleField } = QueryBuilderStore();
+  const { addRule, setRuleField, recentField } = QueryBuilderStore();
   const field = fields.find((fld) => fld.name === rule?.field);
+  const [search, setSearch] = useState("");
+  const [tab, setTab] = useState();
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -54,13 +56,15 @@ export const CustomFilterControl = ({
       >
         <div className="flex gap-2">
           <div className="relative w-full">
-            <Input className="rounded-lg pl-10" placeholder="Search" />
+            <Input
+              className="rounded-lg bg-muted pl-10"
+              onChange={(e) =>
+                setSearch(e.currentTarget.value.trim().toLowerCase())
+              }
+              placeholder="Search"
+            />
             <MagnifyingGlassIcon className="absolute left-3 top-2 h-5 w-5" />
           </div>
-          <Button variant={"ghost"}>
-            <PlusIcon className="mr-2 h-5" />
-            Create
-          </Button>
         </div>
         <div className="divided-x mt-4 flex">
           <div className="min-w-28">
@@ -83,46 +87,68 @@ export const CustomFilterControl = ({
             <div className="mt-2.5 px-2">
               <h1 className="text-xs font-bold">Recents</h1>
               <div className="py-2">
-                <Button
-                  variant={"ghost"}
-                  className="w-full justify-start text-xs font-medium"
-                >
-                  <PersonIcon className="mr-2 h-5" />
-                  User
-                </Button>
+                {recentField ? (
+                  <Button
+                    onClick={() => {
+                      if (rule) {
+                        setRuleField(ruleIndex!, recentField.name);
+                      } else {
+                        addRule(recentField.name);
+                      }
+                      setOpen(false);
+                    }}
+                    variant={"ghost"}
+                    className="w-full justify-start text-xs font-medium"
+                  >
+                    {recentField.datatype == "text" ? (
+                      <LetterCaseCapitalizeIcon className="mr-2 h-5" />
+                    ) : recentField.datatype == "number" ? (
+                      <FrameIcon className="mr-2 h-5" />
+                    ) : (
+                      <CalendarIcon className="mr-2 h-5" />
+                    )}
+                    {recentField.label}
+                  </Button>
+                ) : (
+                  <p className="text-xs">No recents yet.</p>
+                )}
               </div>
             </div>
             <hr />
             <div className="mt-4 px-2">
               <h1 className="text-xs font-bold">All User Properties</h1>
               <div className="py-2">
-                {fields.map((item) => (
-                  <Button
-                    onClick={() => {
-                      if (rule) {
-                        setRuleField(ruleIndex!, item.name);
-                      } else {
-                        addRule(item.name);
-                      }
-                      setOpen(false);
-                    }}
-                    key={`filter-item-${item.name}`}
-                    variant={"ghost"}
-                    className={cn(
-                      "w-full justify-start text-xs font-semibold",
-                      field?.name == item.name ? "bg-muted" : "",
-                    )}
-                  >
-                    {item.datatype == "text" ? (
-                      <LetterCaseCapitalizeIcon className="mr-2 h-5" />
-                    ) : item.datatype == "number" ? (
-                      <FrameIcon className="mr-2 h-5" />
-                    ) : (
-                      <CalendarIcon className="mr-2 h-5" />
-                    )}
-                    {item.label}
-                  </Button>
-                ))}
+                {fields
+                  ?.filter((item) =>
+                    item.name.toLowerCase().includes(search.toLowerCase()),
+                  )
+                  .map((item) => (
+                    <Button
+                      onClick={() => {
+                        if (rule) {
+                          setRuleField(ruleIndex!, item.name);
+                        } else {
+                          addRule(item.name);
+                        }
+                        setOpen(false);
+                      }}
+                      key={`filter-item-${item.name}`}
+                      variant={"ghost"}
+                      className={cn(
+                        "w-full justify-start text-xs font-semibold",
+                        field?.name == item.name ? "bg-muted" : "",
+                      )}
+                    >
+                      {item.datatype == "text" ? (
+                        <LetterCaseCapitalizeIcon className="mr-2 h-5" />
+                      ) : item.datatype == "number" ? (
+                        <FrameIcon className="mr-2 h-5" />
+                      ) : (
+                        <CalendarIcon className="mr-2 h-5" />
+                      )}
+                      {item.label}
+                    </Button>
+                  ))}
               </div>
             </div>
           </ScrollArea>
