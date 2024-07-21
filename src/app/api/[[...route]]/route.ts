@@ -3,7 +3,7 @@ import { handle } from 'hono/vercel';
 import prisma from '@/lib/db/client';
 import { convertToPrismaQuery } from "@/lib/helpers/query-to-prisma";
 
-export const runtime = 'edge'
+export const runtime = "nodejs";
 
 // Initialize the Hono app with a base path of '/api'
 const app = new Hono().basePath('/api');
