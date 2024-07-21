@@ -1,4 +1,4 @@
-# Custom Query Builder
+# Next.js Custom Query Builder
 
 This is a Next.js project bootstrapped with create-next-app. It features a custom query builder with components for managing queries, including filter controls, date pickers, and search functionalities.
 
