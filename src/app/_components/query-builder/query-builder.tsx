@@ -228,6 +228,7 @@ export function RuleInputValue({
       } else {
         return (
           <Input
+            type="number"
             onBlur={(e) =>
               setRuleValue(ruleIndex, e.currentTarget.value, groupIndex)
             }
