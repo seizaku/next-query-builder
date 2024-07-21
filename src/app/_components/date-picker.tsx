@@ -9,6 +9,9 @@ import { CalendarIcon } from "@radix-ui/react-icons";
 import { useEffect, useState } from "react";
 import {
   addDays,
+  addHours,
+  addMonths,
+  addWeeks,
   differenceInDays,
   format,
   subDays,
@@ -66,7 +69,7 @@ export function CustomDatePicker({
       <PopoverContent className="w-auto p-0" align="start">
         <Calendar
           mode="single"
-          selected={query?.rules[ruleIndex]?.value}
+          selected={date}
           onSelect={(value) => setDate(value!)}
           initialFocus
         />
@@ -92,32 +95,53 @@ export function CustomDateRangePicker({
     from: subDays(new Date(), 7),
     to: new Date(),
   });
+  console.log(date);
 
   async function handleDateChange() {
     switch (unit) {
       case "hours":
-        setDate({
-          from: subHours(new Date(), data),
-          to: new Date(),
-        });
+        rule.operator !== "next"
+          ? setDate({
+              from: subHours(new Date(), data),
+              to: new Date(),
+            })
+          : setDate({
+              from: new Date(),
+              to: addHours(new Date(), data),
+            });
         break;
       case "days":
-        setDate({
-          from: subDays(new Date(), data),
-          to: new Date(),
-        });
+        rule.operator !== "next"
+          ? setDate({
+              from: subDays(new Date(), data),
+              to: new Date(),
+            })
+          : setDate({
+              from: new Date(),
+              to: addDays(new Date(), data),
+            });
         break;
       case "weeks":
-        setDate({
-          from: subWeeks(new Date(), data),
-          to: new Date(),
-        });
+        rule.operator !== "next"
+          ? setDate({
+              from: subWeeks(new Date(), data),
+              to: new Date(),
+            })
+          : setDate({
+              from: new Date(),
+              to: addWeeks(new Date(), data),
+            });
         break;
       case "months":
-        setDate({
-          from: subMonths(new Date(), data),
-          to: new Date(),
-        });
+        rule.operator !== "next"
+          ? setDate({
+              from: subMonths(new Date(), data),
+              to: new Date(),
+            })
+          : setDate({
+              from: new Date(),
+              to: addMonths(new Date(), data),
+            });
         break;
     }
   }
@@ -127,13 +151,25 @@ export function CustomDateRangePicker({
   }, [unit, data]);
 
   useEffect(() => {
-    setRuleValue(
-      ruleIndex,
-      date?.from
-        ? `${date?.from?.toISOString()},${date?.to?.toISOString()}`
-        : undefined,
-    );
+    setRuleValue(ruleIndex, `${date?.from},${date?.to}`);
   }, [date]);
+
+  useEffect(() => {
+    const updateDate = () => {
+      if (rule.operator == "next") {
+        setDate({
+          from: new Date(),
+          to: addDays(new Date(), 7),
+        });
+        handleDateChange();
+      }
+    };
+    updateDate();
+  }, []);
+
+  const isBetween = ["between", "notBetween"].includes(rule.operator);
+  const isLast = ["last", "notLast", "beforeLast"].includes(rule.operator);
+  const isNext = ["next"].includes(rule.operator);
 
   return (
     <div className={cn("grid gap-2")}>
@@ -162,40 +198,52 @@ export function CustomDateRangePicker({
             )}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="start">
-          <div className="flex w-1/2 gap-2 p-2">
-            <Input
-              type="number"
-              value={data}
-              min={0}
-              onChange={(e) => {
-                setData(parseInt(e.currentTarget.value) || 0);
-                handleDateChange();
-              }}
-            />
-            <Select
-              onValueChange={(value) => {
-                setUnit(value as "hours" | "days" | "weeks" | "months");
-              }}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Days" defaultValue={"days"} />
-              </SelectTrigger>
-              <SelectContent position="popper">
-                <SelectItem value="hours">Hours</SelectItem>
-                <SelectItem value="days">Days</SelectItem>
-                <SelectItem value="weeks">Weeks</SelectItem>
-                <SelectItem value="months">Months</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+        <PopoverContent
+          className={cn("p-0", isBetween ? "w-auto" : "w-64")}
+          align="start"
+        >
+          {!isBetween && (
+            <div className="flex w-full gap-2 p-2">
+              <Input
+                type="number"
+                value={data}
+                min={0}
+                onChange={(e) => {
+                  setData(parseInt(e.currentTarget.value) || 0);
+                  handleDateChange();
+                }}
+              />
+              <Select
+                onValueChange={(value) => {
+                  setUnit(value as "hours" | "days" | "weeks" | "months");
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Days" defaultValue={"days"} />
+                </SelectTrigger>
+                <SelectContent position="popper">
+                  <SelectItem value="hours">Hours</SelectItem>
+                  <SelectItem value="days">Days</SelectItem>
+                  <SelectItem value="weeks">Weeks</SelectItem>
+                  <SelectItem value="months">Months</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
           <Calendar
+            disabled={
+              isNext
+                ? { before: new Date() }
+                : isLast
+                  ? { after: new Date() }
+                  : undefined
+            }
             initialFocus
             mode="range"
             selected={date}
             onSelect={(e) => {
               setDate(e);
-              if (e?.from && e.to) {
+              if (e?.from && e?.to) {
                 setData(
                   differenceInDays(
                     e?.from > e.to ? e.from : e.to,
@@ -203,10 +251,10 @@ export function CustomDateRangePicker({
                   ),
                 );
               } else {
-                setData(0);
+                setData(1);
               }
             }}
-            numberOfMonths={2}
+            numberOfMonths={isBetween ? 2 : 1}
           />
         </PopoverContent>
       </Popover>
