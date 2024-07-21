@@ -1,10 +1,9 @@
-Next.js Custom Query Builder
+# Next.js Custom Query Builder
 
 This is a Next.js project featuring a custom query builder. It provides an intuitive interface for managing complex queries with dynamic filters, date pickers, and search features.
 
-You can see a live demo at **https://nextjs-starter.now.sh**
-
-Tech Stack
+You can see a live demo at https://seizaku-query-builder.vercel.app/
+## Tech Stack
 
 - Next.js - React framework for server-side rendering and static site generation.
 - Prisma - ORM for database management.
@@ -13,47 +12,34 @@ Tech Stack
 - TailwindCSS - Utility-first CSS framework for styling.
 - ShadcnUI - Component library for building user interfaces.
 
-Getting Started
 
-1. Install Dependencies
 
-   Run the following command to install dependencies:
+## Installation
 
-   npm install
-   yarn install
-   pnpm install
-   bun install
+To get a local copy up and running, follow these simple steps:
 
-2. Run the Development Server
+Clone the repository:
+   ```sh
+   git clone https://github.com/seizaku/next-query-builder.git
+```
 
-   Start the development server:
+Install Dependencies
+   ```sh
+    npm install
+    yarn install
+    pnpm install
+    bun install
+```
 
-   npm run dev
-   yarn dev
-   pnpm dev
-   bun dev
+Run the Development Server
+   ```sh
+    npm run dev
+    yarn dev 
+    pnpm dev bun dev
+```
 
-3. View the Application
 
-   Open http://localhost:3000 in your browser.
+## Screenshots
 
-4. Edit the Application
+![App Screenshot](https://gcdnb.pbrd.co/images/gvcq8QaZ4Dp8.png?o=1)
 
-   Modify app/page.tsx to start editing the page. The page will auto-update with your changes.
-
-Features
-
-- Custom query builder interface
-- Dynamic filter controls
-- Date range and date picker components
-- Search functionality
-
-Learn More
-
-- Next.js Documentation - Learn about Next.js features and API.
-- Learn Next.js - Interactive Next.js tutorial.
-- Next.js GitHub Repository - Repository for feedback and contributions.
-
-Deploy on Vercel
-
-For deployment, use the Vercel Platform. For more details, see the Next.js deployment documentation.
