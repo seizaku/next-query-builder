@@ -1,5 +1,5 @@
 "use client";
-import { defaultOperators, Field, RuleType } from "react-querybuilder";
+import { RuleType } from "react-querybuilder";
 import { CustomFilterControl } from "./custom-filter";
 import { QueryBuilderStore } from "@/lib/stores/query-builder-store";
 import {
@@ -19,121 +19,12 @@ import {
   PopoverContent,
 } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { UserDataStore } from "@/lib/stores/user-data-store";
 import { CustomDatePicker, CustomDateRangePicker } from "./date-picker";
-
-// This contains all the fields that can be queried
-export const fields: Field[] = [
-  {
-    name: "name",
-    label: "Name",
-    datatype: "text",
-    inputType: "text",
-  },
-  {
-    name: "email",
-    label: "Email",
-    datatype: "text",
-    inputType: "text",
-  },
-  {
-    name: "profile.avatar",
-    label: "AvatarURL",
-    datatype: "text",
-    inputType: "text",
-  },
-  {
-    name: "profile.company",
-    label: "Company",
-    datatype: "text",
-    inputType: "text",
-  },
-  {
-    name: "profile.age",
-    label: "Age",
-    datatype: "number",
-    inputType: "text",
-  },
-  {
-    name: "profile.sex",
-    label: "Sex",
-    datatype: "text",
-    inputType: "text",
-  },
-  {
-    name: "profile.zipCode",
-    label: "Zip Code",
-    datatype: "text",
-    inputType: "text",
-  },
-  {
-    name: "profile.country",
-    label: "Country",
-    datatype: "text",
-    inputType: "text",
-  },
-  {
-    name: "profile.state",
-    label: "State",
-    datatype: "text",
-    inputType: "text",
-  },
-  {
-    name: "createdAt",
-    label: "Created",
-    datatype: "date",
-    inputType: "date",
-  },
-  {
-    name: "updatedAt",
-    label: "Updated",
-    datatype: "date",
-    inputType: "date",
-  },
-];
-
-// Customize operators for each type; otherwise, return the default
-export function getOperators(fieldName: string) {
-  // Find the field name and get the input type
-  const field = fields.find((fld) => fld.name === fieldName);
-  switch (field?.datatype) {
-    case "text":
-      return [
-        { name: "=", label: "Is" },
-        { name: "!=", label: "Is not" },
-        { name: "contains", label: "Contains" },
-        { name: "doesNotContain", label: "Does not contain" },
-        { name: "notNull", label: "Is set" },
-        { name: "null", label: "Is not set" },
-      ];
-    case "number":
-      return [
-        { name: "=", label: "Equals" },
-        { name: "!=", label: "Not Equal" },
-        { name: ">", label: "Greater than" },
-        { name: ">=", label: "Greater than or equal to" },
-        { name: "<", label: "Less than" },
-        { name: "<=", label: "Less than or equal to" },
-        { name: "between", label: "Between" },
-        { name: "notBetween", label: "Not between" },
-      ];
-    case "date":
-      return [
-        { name: "last", label: "Last" },
-        { name: "notLast", label: "Not in the last" },
-        { name: "between", label: "Between" },
-        { name: "notBetween", label: "Not between" },
-        { name: "=", label: "On" },
-        { name: "!=", label: "Not on" },
-        { name: "beforeLast", label: "Before the last" },
-        { name: "<", label: "Before" },
-        { name: "since", label: "Since" },
-        { name: "next", label: "In the next" },
-      ];
-  }
-  return defaultOperators;
-}
+import { fields } from "@/config/fields";
+import { getOperators } from "@/lib/helpers/get-operators";
+import { cn } from "@/lib/utils";
 
 // Custom query builder
 export function CustomQueryBuilder() {
@@ -203,6 +94,7 @@ export function RuleOperators({
 }) {
   const { setRuleOperator } = QueryBuilderStore();
   const operators = getOperators(rule.field);
+
   return (
     <Select onValueChange={(operator) => setRuleOperator(ruleIndex, operator)}>
       <SelectTrigger
@@ -247,21 +139,21 @@ export function RuleInputValue({
   const { setRuleValue } = QueryBuilderStore();
   const field = fields.find((fld) => fld.name === rule.field);
 
-  if (rule.operator == "null" || rule.operator == "notNull") {
-    setRuleValue(ruleIndex, "");
-    return null;
-  }
-
   switch (field?.datatype) {
     case "text":
       return <CustomSelectValue rule={rule} ruleIndex={ruleIndex} />;
     case "number":
-      return (
-        <Input
-          onBlur={(e) => setRuleValue(ruleIndex, e.currentTarget.value)}
-          className="w-fit"
-        />
-      );
+      const rangeOperators = ["between", "notBetween"];
+      if (rangeOperators.includes(rule.operator)) {
+        return <CustomNumberRange ruleIndex={ruleIndex} />;
+      } else {
+        return (
+          <Input
+            onBlur={(e) => setRuleValue(ruleIndex, e.currentTarget.value)}
+            className="w-fit"
+          />
+        );
+      }
     case "date":
       const dateRangeOperators = [
         "between",
@@ -269,6 +161,7 @@ export function RuleInputValue({
         "last",
         "notLast",
         "beforeLast",
+        "next",
       ];
       if (dateRangeOperators.includes(rule.operator)) {
         return <CustomDateRangePicker rule={rule} ruleIndex={ruleIndex} />;
@@ -313,10 +206,17 @@ export function CustomSelectValue({
     }
   }
 
+  useEffect(() => {
+    setValue("");
+  }, [rule.operator]);
+
+  const display =
+    rule.operator == "null" || rule.operator == "notNull" ? "hidden" : "block";
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant={"outline"} className="my-2 w-fit">
+        <Button variant={"outline"} className={cn("my-2 w-fit", display)}>
           {!!value.length ? value : "Select value"}
         </Button>
       </PopoverTrigger>
@@ -362,17 +262,16 @@ export function CustomSelectValue({
                 </>
               ) : (
                 users
-                  ?.filter(
-                    (item: any) =>
+                  ?.filter((item: any) => {
+                    return (
                       item[rule.field]
-                        ?.toString()
                         ?.toLowerCase()
-                        ?.includes(search) ||
+                        ?.includes(search?.toLowerCase()) ||
                       item["profile"]?.[rule.field.split(".")?.[1]]
-                        ?.toString()
                         ?.toLowerCase()
-                        ?.includes(search),
-                  )
+                        ?.includes(search?.toLowerCase())
+                    );
+                  })
                   .map((item: any) => (
                     <Button
                       key={item.id} // Ensure each Button has a unique key
@@ -420,5 +319,33 @@ export function RuleDeleteButton({ ruleIndex }: { ruleIndex: number }) {
     >
       <TrashIcon className="h-5 w-5 text-muted-foreground group-hover:text-red-500" />
     </Button>
+  );
+}
+
+export function CustomNumberRange({ ruleIndex }: { ruleIndex: number }) {
+  const { setRuleValue } = QueryBuilderStore();
+  const [from, setFrom] = useState(0);
+  const [to, setTo] = useState(0);
+
+  useEffect(() => {
+    setRuleValue(ruleIndex, `${from}-${to}`);
+  }, [from, to]);
+
+  return (
+    <>
+      <Input
+        defaultValue={from}
+        type="number"
+        onBlur={(e) => setFrom(parseInt(e.currentTarget.value))}
+        className="w-24"
+      />
+      <span className="px-2 text-sm font-medium">and</span>
+      <Input
+        defaultValue={to}
+        type="number"
+        onBlur={(e) => setTo(parseInt(e.currentTarget.value))}
+        className="w-24"
+      />
+    </>
   );
 }
