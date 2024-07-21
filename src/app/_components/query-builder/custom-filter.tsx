@@ -1,4 +1,5 @@
 "use client";
+
 import {
   Popover,
   PopoverTrigger,
@@ -8,7 +9,6 @@ import { Button } from "@/components/ui/button";
 import {
   PlusIcon,
   MagnifyingGlassIcon,
-  PersonIcon,
   FrameIcon,
   CalendarIcon,
   LetterCaseCapitalizeIcon,
@@ -16,11 +16,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { RuleType } from "react-querybuilder";
-import { fields } from "@/config/fields";
+import { fields, tabs } from "@/config/fields";
 import { cn } from "@/lib/utils";
 import { QueryBuilderStore } from "@/lib/stores/query-builder-store";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 
+// Component
 export const CustomFilterControl = ({
   rule,
   ruleIndex,
@@ -31,9 +32,47 @@ export const CustomFilterControl = ({
   groupIndex?: number[];
 }) => {
   const [open, setOpen] = useState(false);
-  const { addRule, setRuleField, recentField } = QueryBuilderStore();
-  const field = fields.find((fld) => fld.name === rule?.field);
   const [search, setSearch] = useState("");
+  const [currentTab, setCurrentTab] = useState(tabs[0]);
+
+  const { addRule, setRuleField, recentField } = QueryBuilderStore();
+  const field = useMemo(
+    () => fields.find((fld) => fld.name === rule?.field),
+    [rule?.field],
+  );
+
+  // Handle tab click
+  const handleTabClick = (tab: (typeof tabs)[0]) => setCurrentTab(tab);
+
+  // Filter fields based on the current tab and search input
+  const filteredFields = useMemo(() => {
+    return fields.filter((item) => {
+      if (currentTab.prefix === "") {
+        return !item.name.includes(".");
+      }
+      if (currentTab.prefix === "*") {
+        return item.name.toLowerCase().includes(search.toLowerCase());
+      }
+      return (
+        item.name.toLowerCase().includes(search.toLowerCase()) &&
+        item.name.startsWith(currentTab.prefix || "")
+      );
+    });
+  }, [currentTab.prefix, search]);
+
+  // Render button icons based on datatype
+  const renderIcon = (datatype: string) => {
+    switch (datatype) {
+      case "text":
+        return <LetterCaseCapitalizeIcon className="mr-2 h-5" />;
+      case "number":
+        return <FrameIcon className="mr-2 h-5" />;
+      case "date":
+        return <CalendarIcon className="mr-2 h-5" />;
+      default:
+        return null;
+    }
+  };
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -43,8 +82,7 @@ export const CustomFilterControl = ({
             field.label
           ) : (
             <>
-              <PlusIcon className="mr-2 h-5" />
-              Filter
+              <PlusIcon className="mr-2 h-5" /> Filter
             </>
           )}
         </Button>
@@ -69,22 +107,23 @@ export const CustomFilterControl = ({
         </div>
         <div className="divided-x mt-4 flex">
           <div className="min-w-28">
-            <Button
-              variant={"ghost"}
-              className="w-full justify-start text-xs font-semibold"
-            >
-              <LetterCaseCapitalizeIcon className="mr-2 h-3" />
-              All
-            </Button>
-            <Button
-              variant={"ghost"}
-              className="w-full justify-start text-xs font-semibold"
-            >
-              <PersonIcon className="mr-2 h-3" />
-              User
-            </Button>
+            {tabs.map((category) => (
+              <Button
+                key={category.name}
+                variant={
+                  currentTab.name === category.name ? "secondary" : "ghost"
+                }
+                className="w-full justify-start text-xs font-semibold"
+                onClick={() => handleTabClick(category)}
+              >
+                {category.icon ?? (
+                  <LetterCaseCapitalizeIcon className="mr-2 h-3" />
+                )}
+                {category.name.charAt(0).toUpperCase() + category.name.slice(1)}
+              </Button>
+            ))}
           </div>
-          <ScrollArea className="ml-2 max-h-[320px] w-full border-l px-2">
+          <ScrollArea className="ml-2 h-[320px] w-full border-l px-2">
             <div className="mt-2.5 px-2">
               <h1 className="text-xs font-bold">Recents</h1>
               <div className="py-2">
@@ -101,13 +140,7 @@ export const CustomFilterControl = ({
                     variant={"ghost"}
                     className="w-full justify-start text-xs font-medium"
                   >
-                    {recentField.datatype == "text" ? (
-                      <LetterCaseCapitalizeIcon className="mr-2 h-5" />
-                    ) : recentField.datatype == "number" ? (
-                      <FrameIcon className="mr-2 h-5" />
-                    ) : (
-                      <CalendarIcon className="mr-2 h-5" />
-                    )}
+                    {renderIcon(recentField.datatype as string)}
                     {recentField.label}
                   </Button>
                 ) : (
@@ -117,39 +150,33 @@ export const CustomFilterControl = ({
             </div>
             <hr />
             <div className="mt-4 px-2">
-              <h1 className="text-xs font-bold">All User Properties</h1>
+              <h1 className="text-xs font-bold">
+                {currentTab.name === "All"
+                  ? "All Properties"
+                  : `${currentTab.name.charAt(0).toUpperCase() + currentTab.name.slice(1)} Properties`}
+              </h1>
               <div className="py-2">
-                {fields
-                  ?.filter((item) =>
-                    item.name.toLowerCase().includes(search.toLowerCase()),
-                  )
-                  .map((item) => (
-                    <Button
-                      onClick={() => {
-                        if (rule) {
-                          setRuleField(ruleIndex!, item.name, groupIndex);
-                        } else {
-                          addRule(item.name, groupIndex);
-                        }
-                        setOpen(false);
-                      }}
-                      key={`filter-item-${item.name}`}
-                      variant={"ghost"}
-                      className={cn(
-                        "w-full justify-start text-xs font-semibold",
-                        field?.name == item.name ? "bg-muted" : "",
-                      )}
-                    >
-                      {item.datatype == "text" ? (
-                        <LetterCaseCapitalizeIcon className="mr-2 h-5" />
-                      ) : item.datatype == "number" ? (
-                        <FrameIcon className="mr-2 h-5" />
-                      ) : (
-                        <CalendarIcon className="mr-2 h-5" />
-                      )}
-                      {item.label}
-                    </Button>
-                  ))}
+                {filteredFields.map((item) => (
+                  <Button
+                    onClick={() => {
+                      if (rule) {
+                        setRuleField(ruleIndex!, item.name, groupIndex);
+                      } else {
+                        addRule(item.name, groupIndex);
+                      }
+                      setOpen(false);
+                    }}
+                    key={`filter-item-${item.name}`}
+                    variant={"ghost"}
+                    className={cn(
+                      "w-full justify-start text-xs font-semibold",
+                      field?.name === item.name ? "bg-muted" : "",
+                    )}
+                  >
+                    {renderIcon(item.datatype as string)}
+                    {item.label}
+                  </Button>
+                ))}
               </div>
             </div>
           </ScrollArea>
