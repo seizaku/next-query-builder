@@ -14,25 +14,26 @@ type Query = RuleGroupType;
 type QueryStoreProps = {
   query: Query;
   recentField?: Field;
-  addRule: (fieldName: string, groupIndex?: number[]) => void;
-  addGroup: (groupIndex?: number[]) => void;
-  setCombinator: (combinator: "and" | "or", groupIndex?: number[]) => void;
+  setQueryRules: (query: Array<RuleType | RuleGroupType>) => void;
+  addRule: (fieldName: string, groupIndex?: number[] | undefined) => void;
+  addGroup: (groupIndex?: number[] | undefined) => void;
+  setCombinator: (combinator: "and" | "or", groupIndex?: number[] | undefined) => void;
   setRuleField: (
     index: number,
     fieldName: string,
-    groupIndex?: number[],
+    groupIndex?: number[] | undefined,
   ) => void;
   setRuleOperator: (
     index: number,
     operator: string,
-    groupIndex?: number[],
+    groupIndex?: number[] | undefined,
   ) => void;
   setRuleValue: (
     index: number,
     value: string | undefined,
-    groupIndex?: number[],
+    groupIndex?: number[] | undefined,
   ) => void;
-  deleteRule: (index: number, groupIndex?: number[]) => void;
+  deleteRule: (index: number, groupIndex?: number[] | undefined) => void;
 };
 
 // Type guard to check if an item is a RuleType
@@ -53,6 +54,12 @@ export const QueryBuilderStore = create<QueryStoreProps>((set, get) => ({
   query: {
     combinator: "and",
     rules: [],
+  },
+  setQueryRules: (rules) => {
+    set({ query: {
+      ...get().query,
+      rules
+    } });
   },
 
   addRule: (fieldName, groupIndex) => {
@@ -176,7 +183,11 @@ export const QueryBuilderStore = create<QueryStoreProps>((set, get) => ({
     const { getUserData } = UserDataStore.getState();
     const query = get().query;
 
-    if (!groupIndex?.length && isRuleType(query.rules[index]) && query.rules[index].value !== value) {
+    if (
+      !groupIndex?.length &&
+      isRuleType(query.rules[index]) &&
+      query.rules[index].value !== value
+    ) {
       query.rules[index].value = value;
       set({ query });
       getUserData();

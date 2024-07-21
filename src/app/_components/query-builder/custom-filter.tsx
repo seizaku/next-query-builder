@@ -34,7 +34,6 @@ export const CustomFilterControl = ({
   const { addRule, setRuleField, recentField } = QueryBuilderStore();
   const field = fields.find((fld) => fld.name === rule?.field);
   const [search, setSearch] = useState("");
-  const [tab, setTab] = useState();
 
   return (
     <Popover open={open} onOpenChange={setOpen}>

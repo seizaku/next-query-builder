@@ -38,7 +38,7 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 
-export function CustomDatePicker({
+export function CustomDateInput({
   rule,
   ruleIndex,
   groupIndex,
@@ -98,7 +98,7 @@ export function CustomDatePicker({
   );
 }
 
-export function CustomDateRangePicker({
+export function CustomDateRangeInput({
   rule,
   ruleIndex,
   groupIndex,
