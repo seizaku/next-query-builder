@@ -5,7 +5,10 @@ import { CustomQueryBuilder } from "./_components/query-builder";
 import { Query } from "./_components/query";
 import { ControlRule } from "./_components/control-rule";
 
+export const dynamic = "force-dynamic";
+
 async function fetchData() {
+  "use server";
   try {
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users`);
 
