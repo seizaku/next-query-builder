@@ -70,10 +70,10 @@ const buildDateRangeCondition = (
     case "notBetween":
       return {
         [field]: {
-          not: {
-            gte: value,
-            lte: endDate && isValidDate(endDate.toDateString()) ? endDate : value,
-          },
+          OR: [
+            { [field]: { lt: startOfDay } }, // Dates before the start of the range
+            { [field]: { gt: endDate && isValidDate(endDate.toDateString()) ? endDate : value } } // Dates after the end of the range
+          ]
         },
       };
     case "last":
@@ -96,7 +96,7 @@ const buildDateRangeCondition = (
           lte: add(value, {
             days: differenceInDays(
               value > endDate ? value : endDate,
-              value < endDate ? value : endDate
+              value < endDate ? value : endDate,
             ),
           }),
         },
@@ -125,7 +125,7 @@ export function convertToPrismaQuery(query: Query): any {
    */
   const buildPrismaQuery = (rules: (Rule | NestedRule)[]): any[] => {
     return rules.map((rule: Rule | NestedRule) => {
-      if ('rules' in rule) {
+      if ("rules" in rule) {
         // Recursively handle nested rules
         return convertToPrismaQuery(rule as NestedRule);
       }
@@ -142,7 +142,12 @@ export function convertToPrismaQuery(query: Query): any {
         switch (fieldData.datatype) {
           case "date":
             const [startDateStr, endDateStr] = value.split(",");
-            if (startDateStr && endDateStr && !isNaN(Date.parse(startDateStr)) && !isNaN(Date.parse(endDateStr))) {
+            if (
+              startDateStr &&
+              endDateStr &&
+              !isNaN(Date.parse(startDateStr)) &&
+              !isNaN(Date.parse(endDateStr))
+            ) {
               return [new Date(startDateStr), new Date(endDateStr)];
             }
             if (!isNaN(Date.parse(value))) {
@@ -150,7 +155,7 @@ export function convertToPrismaQuery(query: Query): any {
             }
             return [];
           case "number":
-            const isRange = value?.includes('-');
+            const isRange = value?.includes("-");
 
             if (isRange) {
               return value;
@@ -169,18 +174,19 @@ export function convertToPrismaQuery(query: Query): any {
       // Type guard to ensure typedValue is an array when accessing indices
       const isArray = Array.isArray(typedValue);
       const startValue = isArray ? typedValue[0] : typedValue;
-      const endValue = isArray && typedValue.length > 1 ? typedValue[1] : undefined;
+      const endValue =
+        isArray && typedValue.length > 1 ? typedValue[1] : undefined;
 
-      const _field = field.includes(".") ? field.split('.') : ['', field];
+      const _field = field.includes(".") ? field.split(".") : ["", field];
 
       // Build the condition based on the operator and typed value
       const condition: any = (() => {
-        if (fieldData.datatype === 'date') {
+        if (fieldData.datatype === "date") {
           return buildDateRangeCondition(
             _field[1],
             startValue as Date,
             operator,
-            endValue as Date
+            endValue as Date,
           );
         }
 
@@ -206,14 +212,28 @@ export function convertToPrismaQuery(query: Query): any {
           case "null":
             return { [_field[1]]: null };
           case "between":
-            return {
-              [_field[1]]: { gte: parseInt((typedValue as string).split("-")[0]), lte: parseInt((typedValue as string).split("-")[1]) },
-            };
-          case "notBetween":
+            if (!(typedValue as string).includes("-")) {
+              return {};
+            }
             return {
               [_field[1]]: {
-                not: { gte: parseInt((typedValue as string).split("-")[0]), lte: parseInt((typedValue as string).split("-")[1]) },
+                gte: parseInt((typedValue as string).split("-")[0]),
+                lte: parseInt((typedValue as string).split("-")[1]),
               },
+            };
+          case "notBetween":
+            if (!(typedValue as string).includes("-")) {
+              return {};
+            }
+            const [min, max] = (typedValue as string)
+              .split("-")
+              .map((val) => parseInt(val.trim(), 10));
+
+            return {
+              OR: [
+                { [_field[1]]: { lt: min } }, // Values less than the minimum
+                { [_field[1]]: { gt: max } }, // Values greater than the maximum
+              ],
             };
           default:
             return {};
@@ -224,7 +244,7 @@ export function convertToPrismaQuery(query: Query): any {
       if (field.indexOf(".") !== -1) {
         return { [_field[0]]: condition };
       }
-      console.log(condition)
+      console.log(condition);
 
       return condition;
     });
@@ -238,8 +258,8 @@ export function convertToPrismaQuery(query: Query): any {
     return combinator === "and"
       ? { AND: prismaQuery }
       : combinator === "or"
-      ? { OR: prismaQuery }
-      : prismaQuery[0]; // Return the first condition if no combinator is specified
+        ? { OR: prismaQuery }
+        : prismaQuery[0]; // Return the first condition if no combinator is specified
   }
 
   return {};

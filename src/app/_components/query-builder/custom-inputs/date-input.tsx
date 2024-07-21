@@ -168,7 +168,9 @@ export function CustomDateRangeInput({
   }
 
   useEffect(() => {
-    handleDateChange();
+    if (rule.operator !== "notBetween" && rule.operator !== "between") {
+      handleDateChange();
+    }
   }, [unit, data]);
 
   useEffect(() => {
