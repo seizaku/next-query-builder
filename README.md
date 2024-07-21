@@ -2,6 +2,15 @@
 
 This is a Next.js project bootstrapped with create-next-app. It features a custom query builder with components for managing queries, including filter controls, date pickers, and search functionalities.
 
+## Tech Stack
+
+- **Next.js** - React framework for server-side rendering and static site generation.
+- **Prisma** - ORM for database management.
+- **PostgreSQL** - Relational database system.
+- **Hono** - Backend framework for building APIs.
+- **TailwindCSS** - Utility-first CSS framework for styling.
+- **ShadcnUI** - Component library for building user interfaces.
+
 ## Getting Started
 
 To get started with the project, follow these steps:
