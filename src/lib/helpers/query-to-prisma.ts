@@ -1,9 +1,7 @@
+import { add, differenceInDays, sub } from "date-fns";
 import { RuleType } from "react-querybuilder";
-
-function isValidDate(dateString: string) {
-  const date = new Date(dateString);
-  return !isNaN(date.getTime());
-}
+import { isValidDate } from "./date-validation";
+import { fields } from "@/config/fields";
 
 /**
  * Builds a date range condition for a given field, date, operator, and optional end date.
@@ -14,42 +12,74 @@ function isValidDate(dateString: string) {
  * @param endDate - The optional end date for range conditions.
  * @returns An object representing the Prisma query condition.
  */
-const buildDateRangeCondition = (field: string, date: Date, operator: string, endDate?: Date) => {
+const buildDateRangeCondition = (
+  field: string,
+  date: Date,
+  operator: string,
+  endDate?: Date,
+) => {
   // Shift date by 1 day and set the end of the day
   let value = new Date(date.getTime() + 24 * 60 * 60 * 1000);
   value.setUTCHours(23, 59, 59, 999);
 
   // Get the start of the day for the input date
-  const startOfDay = new Date(date);
+  const startOfDay = new Date(date.getTime() + 24 * 60 * 60 * 1000);
   startOfDay.setUTCHours(0, 0, 0, 0);
-
   switch (operator) {
-    case '=':
+    case "=":
       return { [field]: { gte: startOfDay, lte: value } };
-    case '!=':
-      return { [field]: { not: { gte: startOfDay, lte: value } } };
-    case '<':
+    case "!=":
+      return {
+        OR: [{ [field]: { lt: startOfDay } }, { [field]: { gt: value } }],
+      };
+    case "<":
       return { [field]: { lt: value } };
-    case '<=':
+    case "<=":
       return { [field]: { lte: value } };
-    case '>':
+    case ">":
       return { [field]: { gt: value } };
-    case '>=':
+    case ">=":
       return { [field]: { gte: value } };
-    case 'between':
-      return { [field]: { gte: value, lte: isValidDate(endDate!.toDateString()) ? endDate : value } };
-    case 'notBetween':
-      return { [field]: { not: { gte: value, lte: isValidDate(endDate!.toDateString()) ? endDate : value } } };
-    case 'last':
+    case "between":
+      return {
+        [field]: {
+          gte: value,
+          lte: isValidDate(endDate!.toDateString()) ? endDate : value,
+        },
+      };
+    case "notBetween":
+      return {
+        [field]: {
+          not: {
+            gte: value,
+            lte: isValidDate(endDate!.toDateString()) ? endDate : value,
+          },
+        },
+      };
+    case "last":
       return { [field]: { gte: value, lte: endDate } };
-    case 'notLast':
-      return { [field]: { not: { gte: new Date(Date.now() - Number(value) * 24 * 60 * 60 * 1000) } } };
-    case 'beforeLast':
-      return { [field]: { lt: new Date(Date.now() - Number(value) * 24 * 60 * 60 * 1000) } };
-    case 'since':
-      return { [field]: { gte: new Date(Date.now() - Number(value) * 24 * 60 * 60 * 1000) } };
-    case 'next':
-      return { [field]: { lte: new Date(Date.now() + Number(value) * 24 * 60 * 60 * 1000) } };
+    case "notLast":
+      return {
+        [field]: {
+          not: { gte: value, lte: endDate },
+        },
+      };
+    case "beforeLast":
+      return { [field]: { lt: new Date(date.setUTCHours(0, 0, 0, 0)) } };
+    case "since":
+      return { [field]: { gte: new Date(date.setUTCHours(0, 0, 0, 0)) } };
+    case "next":
+      return {
+        [field]: {
+          gte: new Date(),
+          lte: add(value, {
+            days: differenceInDays(
+              value > endDate! ? value : endDate!,
+              value < endDate! ? value : endDate!,
+            ),
+          }),
+        },
+      };
     default:
       return {};
   }
@@ -76,57 +106,83 @@ export function convertToPrismaQuery(query: any) {
       const { field, operator, value } = rule;
 
       // Ensure value is correctly typed
+      const fieldData = fields.find((item) => item.name == field);
       const typedValue = (() => {
-        if (typeof value === 'string' && value.includes(',') && !isNaN(Date.parse(value.split(',')[0]))) {
-          const range = value.split(',');
-          return [new Date(range[0]), new Date(range[1])];
-        } else if (typeof value === 'string' && !isNaN(Number(value))) {
-          return Number(value);
-        } else if (typeof value === 'string' && !isNaN(Date.parse(value))) {
-          return new Date(value);
+        if (!fieldData) {
+          throw new Error("Field data was not found in the field list.");
         }
-        return value;
-      })();
 
+        switch (fieldData.datatype) {
+          case "date":
+            const [startDateStr, endDateStr] = value.split(",");
+            if (startDateStr && endDateStr && !isNaN(Date.parse(startDateStr)) && !isNaN(Date.parse(endDateStr))) {
+              return [new Date(startDateStr), new Date(endDateStr)];
+            }
+            // Check for single date value
+            if (!isNaN(Date.parse(value))) {
+              return new Date(value);
+            }
+            break;
+          case "number":
+            console.log("THIS IS NOT CONSIDERED NUMERIC")
+            const numericValue = Number(value);
+            if (!isNaN(numericValue) && isFinite(numericValue)) {
+              return numericValue;
+            }
+          default:
+            return value;
+        }
+      })();    
       // Build the condition based on the operator and typed value
-      const condition = (() => {
-        if (typeof value === 'string' && (value.includes(',') && !isNaN(Date.parse(value.split(',')[0]))) || !isNaN(Date.parse(value))) {
-          return buildDateRangeCondition(field, typedValue[0] || typedValue, operator, typedValue[1]);
+      const condition: any = (() => {
+        if (fieldData.datatype == 'date') {
+          return buildDateRangeCondition(
+            field,
+            typedValue[0] || typedValue,
+            operator,
+            typedValue[1],
+          );
         }
 
         switch (operator) {
-          case '=':
+          case "=":
             return { [field]: typedValue };
-          case '!=':
+          case "!=":
             return { [field]: { not: typedValue } };
-          case '<':
+          case "<":
             return { [field]: { lt: typedValue } };
-          case '>':
+          case ">":
             return { [field]: { gt: typedValue } };
-          case '<=':
+          case "<=":
             return { [field]: { lte: typedValue } };
-          case '>=':
+          case ">=":
             return { [field]: { gte: typedValue } };
-          case 'contains':
+          case "contains":
             return { [field]: { contains: typedValue } };
-          case 'doesNotContain':
+          case "doesNotContain":
             return { [field]: { not: { contains: typedValue } } };
-          case 'notNull':
+          case "notNull":
             return { [field]: { not: null } };
-          case 'null':
+          case "null":
             return { [field]: null };
-          case 'between':
-            return { [field]: { gte: typedValue[0], lte: typedValue[1] } };
-          case 'notBetween':
-            return { [field]: { not: { gte: typedValue[0], lte: typedValue[1] } } };
+          case "between":
+            return {
+              [field]: { gte: parseInt(typedValue.split("-")[0]), lte: parseInt(typedValue.split("-")[1]) },
+            };
+          case "notBetween":
+            return {
+              [field]: {
+                not: { gte: parseInt(typedValue.split("-")[0]), lte: parseInt(typedValue.split("-")[1]) },
+              },
+            };
           default:
             return {};
         }
       })();
 
       // Handle nested fields
-      if (field.indexOf('.') !== -1) {
-        const nested = field.split('.');
+      if (field.indexOf(".") !== -1) {
+        const nested = field.split(".");
         return { [nested[0]]: { [nested[1]]: condition[field] } };
       }
 
@@ -139,11 +195,15 @@ export function convertToPrismaQuery(query: any) {
 
   console.log(prismaQuery);
 
-  // Combine conditions using the specified combinator (AND/OR)
-  if (combinator === 'and') {
-    return { AND: prismaQuery };
-  } else if (combinator === 'or') {
-    return { OR: prismaQuery };
+  // Combine conditions using the specified combinator (AND/OR), if there are conditions
+  if (prismaQuery.length > 0) {
+    return combinator === "and"
+      ? { AND: prismaQuery }
+      : combinator === "or"
+      ? { OR: prismaQuery }
+      : prismaQuery[0]; // Return the first condition if no combinator is specified
   }
+
+  console.group(prismaQuery);
   return {};
 }
