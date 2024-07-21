@@ -2,7 +2,7 @@ Next.js Custom Query Builder
 
 This is a Next.js project featuring a custom query builder. It provides an intuitive interface for managing complex queries with dynamic filters, date pickers, and search features.
 
-You can see a live demo at **https://nextjs-starter.now.sh**
+You can see a live demo at **https://seizaku-query-builder.vercel.app/**
 
 Tech Stack
 
