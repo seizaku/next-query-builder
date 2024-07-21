@@ -150,6 +150,12 @@ export function convertToPrismaQuery(query: Query): any {
             }
             return [];
           case "number":
+            const isRange = value?.includes('-');
+
+            if (isRange) {
+              return value;
+            }
+
             const numericValue = Number(value);
             if (!isNaN(numericValue) && isFinite(numericValue)) {
               return numericValue;
