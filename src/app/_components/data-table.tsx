@@ -5,6 +5,8 @@ import {
   getCoreRowModel,
   useReactTable,
   getPaginationRowModel,
+  SortingState,
+  getSortedRowModel,
 } from "@tanstack/react-table";
 
 import {
@@ -30,7 +32,8 @@ export function UserDataTable<TData, TValue>({
   columns,
   data,
 }: UserDataTableProps<TData, TValue>) {
-  const [columnVisibility, setColumnVisibility] = useState({
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [columnVisibility] = useState({
     profile: false, // Hide profile column
   });
   const { users, queryResults, setUserData, loading, setLoading } =
@@ -44,9 +47,11 @@ export function UserDataTable<TData, TValue>({
       ? queryResults
       : users, // If there are filters, then display the query results
     columns,
+    onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    state: { columnVisibility },
+    state: { sorting, columnVisibility },
   });
 
   useEffect(() => {
@@ -58,7 +63,7 @@ export function UserDataTable<TData, TValue>({
     <>
       <div className="rounded-xl border">
         <Table>
-          <TableHeader className="bg-muted">
+          <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
