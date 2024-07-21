@@ -279,7 +279,7 @@ export function RuleDeleteButton({
       size={"icon"}
       variant={"ghost"}
       onClick={() => deleteRule(ruleIndex, groupIndex)}
-      className="group w-10"
+      className="group w-10 hover:bg-red-50 dark:hover:bg-red-500/5"
     >
       <TrashIcon className="h-5 w-5 text-muted-foreground group-hover:text-red-500" />
     </Button>
