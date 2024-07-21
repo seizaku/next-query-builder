@@ -21,7 +21,13 @@ import {
 } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import { RuleType } from "react-querybuilder";
-import { QueryBuilderStore } from "@/lib/stores/query-builder-store";
+
+import {
+  isRuleGroupType,
+  isRuleType,
+  QueryBuilderStore,
+  RuleGroupType,
+} from "@/lib/stores/query-builder-store";
 import { DateRange } from "react-day-picker";
 import { Select } from "@radix-ui/react-select";
 import {
@@ -35,18 +41,24 @@ import { Input } from "@/components/ui/input";
 export function CustomDatePicker({
   rule,
   ruleIndex,
+  groupIndex,
 }: {
   rule: RuleType;
   ruleIndex: number;
+  groupIndex?: number[];
 }) {
   const { query, setRuleValue } = QueryBuilderStore();
   const [date, setDate] = useState<Date>();
 
   useEffect(() => {
     if (date) {
-      setRuleValue(ruleIndex, date.toISOString());
+      setRuleValue(ruleIndex, date.toISOString(), groupIndex);
     }
   }, [date]);
+
+  const formatDate = (date: Date) => {
+    return <>{date ? format(date, "PPP") : <span>Pick a date</span>}</>;
+  };
 
   return (
     <Popover>
@@ -55,15 +67,23 @@ export function CustomDatePicker({
           variant={"outline"}
           className={cn(
             "w-[240px] justify-start text-left font-normal",
-            !query?.rules[ruleIndex].value && "text-muted-foreground",
+            !date && "text-muted-foreground",
           )}
         >
           <CalendarIcon className="mr-2 h-4 w-4" />
-          {query?.rules[ruleIndex].value ? (
-            format(query?.rules[ruleIndex]?.value, "PPP")
-          ) : (
-            <span>Pick a date</span>
-          )}
+          {!groupIndex &&
+            isRuleType(query?.rules[ruleIndex]) &&
+            query?.rules[ruleIndex].value &&
+            formatDate(date!)}
+
+          {groupIndex?.length == 2 &&
+            isRuleGroupType(query?.rules[groupIndex[0]]) &&
+            (
+              (query?.rules[groupIndex![0]] as RuleGroupType).rules[
+                groupIndex![1]
+              ] as RuleType
+            ).value &&
+            formatDate(date!)}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="start">
@@ -81,9 +101,11 @@ export function CustomDatePicker({
 export function CustomDateRangePicker({
   rule,
   ruleIndex,
+  groupIndex,
 }: {
   rule: RuleType;
   ruleIndex: number;
+  groupIndex?: number[];
 }) {
   const { query, setRuleValue } = QueryBuilderStore();
   // Set default date range to 7 days
@@ -95,7 +117,6 @@ export function CustomDateRangePicker({
     from: subDays(new Date(), 7),
     to: new Date(),
   });
-  console.log(date);
 
   async function handleDateChange() {
     switch (unit) {
@@ -151,7 +172,7 @@ export function CustomDateRangePicker({
   }, [unit, data]);
 
   useEffect(() => {
-    setRuleValue(ruleIndex, `${date?.from},${date?.to}`);
+    setRuleValue(ruleIndex, `${date?.from},${date?.to}`, groupIndex);
   }, [date]);
 
   useEffect(() => {
@@ -171,6 +192,20 @@ export function CustomDateRangePicker({
   const isLast = ["last", "notLast", "beforeLast"].includes(rule.operator);
   const isNext = ["next"].includes(rule.operator);
 
+  const formatDateRange = (date: { from?: Date; to?: Date }) => {
+    if (!date?.from) {
+      return <span>Pick a date</span>;
+    }
+
+    return date.to ? (
+      <>
+        {format(date.from, "LLL dd, y")} - {format(date.to, "LLL dd, y")}
+      </>
+    ) : (
+      format(date.from, "LLL dd, y")
+    );
+  };
+
   return (
     <div className={cn("grid gap-2")}>
       <Popover>
@@ -184,18 +219,19 @@ export function CustomDateRangePicker({
             )}
           >
             <CalendarIcon className="mr-2 h-4 w-4" />
-            {query?.rules[ruleIndex].value && date?.from ? (
-              date.to ? (
-                <>
-                  {format(date.from, "LLL dd, y")} -{" "}
-                  {format(date.to, "LLL dd, y")}
-                </>
-              ) : (
-                format(date.from, "LLL dd, y")
-              )
-            ) : (
-              <span>Pick a date</span>
-            )}
+            {!groupIndex &&
+              isRuleType(query?.rules[ruleIndex]) &&
+              query?.rules[ruleIndex].value &&
+              formatDateRange(date!)}
+
+            {groupIndex?.length == 2 &&
+              isRuleGroupType(query?.rules[groupIndex[0]]) &&
+              (
+                (query?.rules[groupIndex![0]] as RuleGroupType).rules[
+                  groupIndex![1]
+                ] as RuleType
+              ).value &&
+              formatDateRange(date!)}
           </Button>
         </PopoverTrigger>
         <PopoverContent

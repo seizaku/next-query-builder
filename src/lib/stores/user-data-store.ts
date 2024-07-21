@@ -34,10 +34,9 @@ export const UserDataStore = create<UserStoreProps>((set, get) => ({
   getUserData: async () => {
     try {
       set({ loading: true });
-      
+
       // Format the current query into JSON format
       const query = QueryBuilderStore.getState().query;
-      if (query.rules.find((rule) => rule.value == '')) return;
 
       const jsonQuery = formatQuery(query, "json");
 
@@ -48,7 +47,7 @@ export const UserDataStore = create<UserStoreProps>((set, get) => ({
 
       // Handle unsuccessful response
       if (!res.ok) {
-        set({ queryResults: [] });
+        set({ loading: false });
         return;
       }
 

@@ -24,9 +24,11 @@ import { useState } from "react";
 export const CustomFilterControl = ({
   rule,
   ruleIndex,
+  groupIndex,
 }: {
   rule?: RuleType;
   ruleIndex?: number;
+  groupIndex?: number[];
 }) => {
   const [open, setOpen] = useState(false);
   const { addRule, setRuleField, recentField } = QueryBuilderStore();
@@ -91,9 +93,9 @@ export const CustomFilterControl = ({
                   <Button
                     onClick={() => {
                       if (rule) {
-                        setRuleField(ruleIndex!, recentField.name);
+                        setRuleField(ruleIndex!, recentField.name, groupIndex);
                       } else {
-                        addRule(recentField.name);
+                        addRule(recentField.name, groupIndex);
                       }
                       setOpen(false);
                     }}
@@ -126,9 +128,9 @@ export const CustomFilterControl = ({
                     <Button
                       onClick={() => {
                         if (rule) {
-                          setRuleField(ruleIndex!, item.name);
+                          setRuleField(ruleIndex!, item.name, groupIndex);
                         } else {
-                          addRule(item.name);
+                          addRule(item.name, groupIndex);
                         }
                         setOpen(false);
                       }}

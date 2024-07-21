@@ -1,5 +1,5 @@
 "use client";
-import { RuleType } from "react-querybuilder";
+import { isRuleGroupType, RuleType } from "react-querybuilder";
 import { CustomFilterControl } from "./custom-filter";
 import { QueryBuilderStore } from "@/lib/stores/query-builder-store";
 import {
@@ -29,34 +29,103 @@ import { cn } from "@/lib/utils";
 // Custom query builder
 export function CustomQueryBuilder() {
   const { query } = QueryBuilderStore();
+  const hasGroupRule = query?.rules.some((item) => "combinator" in item);
 
   return (
-    <div className="rounded-xl border p-4">
-      <h1 className="p-2 text-xs font-bold uppercase text-muted-foreground">
-        All Users
-      </h1>
-      <div className="flex flex-col px-6">
-        {query?.rules.map((rule: RuleType, index: number) => {
+    <>
+      <div
+        className={cn(
+          "rounded-xl border p-4",
+          hasGroupRule && "border-b-none rounded-b-none",
+        )}
+      >
+        <h1 className="p-2 text-xs font-bold uppercase text-muted-foreground">
+          All Users
+        </h1>
+        <div className="flex flex-col px-6">
+          {query?.rules
+            .filter((item) => "field" in item)
+            .map((rule, index: number) => {
+              return (
+                // Display each query rule
+                <div key={`field-${index}`} className="flex items-center gap-2">
+                  {index == 0 ? (
+                    <span className="mr-2 w-12 text-end text-sm font-semibold text-muted-foreground">
+                      where
+                    </span>
+                  ) : (
+                    <RuleCombinator />
+                  )}
+                  <CustomFilterControl rule={rule} ruleIndex={index} />
+                  <RuleOperators rule={rule} ruleIndex={index} />
+                  <RuleInputValue rule={rule} ruleIndex={index} />
+                  <RuleDeleteButton ruleIndex={index} />
+                </div>
+              );
+            })}
+          <CustomFilterControl />
+        </div>
+      </div>
+      {query?.rules.map((rule, groupIndex: number) => {
+        if (isRuleGroupType(rule)) {
+          const isNotLastElement = query?.rules.length - 1 != groupIndex;
+          console.log(groupIndex);
           return (
-            // Display each query rule
-            <div key={`field-${index}`} className="flex items-center gap-2">
-              {index == 0 ? (
-                <span className="mr-2 w-12 text-end text-sm font-semibold text-muted-foreground">
-                  where
-                </span>
-              ) : (
-                <RuleCombinator />
+            <div
+              className={cn(
+                "border-t-none rounded-xl rounded-t-none border p-4",
+                isNotLastElement && "rounded-b-none",
               )}
-              <CustomFilterControl rule={rule} ruleIndex={index} />
-              <RuleOperators rule={rule} ruleIndex={index} />
-              <RuleInputValue rule={rule} ruleIndex={index} />
-              <RuleDeleteButton ruleIndex={index} />
+            >
+              <h1 className="p-2 text-xs font-bold uppercase text-muted-foreground">
+                All Users
+              </h1>
+              <div className="flex flex-col px-6">
+                {rule
+                  ?.rules!.filter((item) => "field" in item)
+                  .map((rule, index: number) => {
+                    return (
+                      // Display each query rule
+                      <div
+                        key={`field-${index}`}
+                        className="flex items-center gap-2"
+                      >
+                        {index == 0 ? (
+                          <span className="mr-2 w-12 text-end text-sm font-semibold text-muted-foreground">
+                            where
+                          </span>
+                        ) : (
+                          <RuleCombinator />
+                        )}
+                        <CustomFilterControl
+                          rule={rule}
+                          ruleIndex={index}
+                          groupIndex={[groupIndex, index]}
+                        />
+                        <RuleOperators
+                          rule={rule}
+                          ruleIndex={index}
+                          groupIndex={[groupIndex, index]}
+                        />
+                        <RuleInputValue
+                          rule={rule}
+                          ruleIndex={index}
+                          groupIndex={[groupIndex, index]}
+                        />
+                        <RuleDeleteButton
+                          ruleIndex={index}
+                          groupIndex={[groupIndex, index]}
+                        />
+                      </div>
+                    );
+                  })}
+                <CustomFilterControl groupIndex={[groupIndex]} />
+              </div>
             </div>
           );
-        })}
-        <CustomFilterControl />
-      </div>
-    </div>
+        }
+      })}
+    </>
   );
 }
 
@@ -88,15 +157,21 @@ export function RuleCombinator() {
 export function RuleOperators({
   rule,
   ruleIndex,
+  groupIndex,
 }: {
   rule: RuleType;
   ruleIndex: number;
+  groupIndex?: number[];
 }) {
   const { setRuleOperator } = QueryBuilderStore();
   const operators = getOperators(rule.field);
 
   return (
-    <Select onValueChange={(operator) => setRuleOperator(ruleIndex, operator)}>
+    <Select
+      onValueChange={(operator) =>
+        setRuleOperator(ruleIndex, operator, groupIndex ?? undefined)
+      }
+    >
       <SelectTrigger
         showIcon={false}
         className="w-fit transition-transform ease-in-out hover:border-foreground"
@@ -132,24 +207,36 @@ export function RuleOperators({
 export function RuleInputValue({
   rule,
   ruleIndex,
+  groupIndex,
 }: {
   rule: RuleType;
   ruleIndex: number;
+  groupIndex?: number[];
 }) {
   const { setRuleValue } = QueryBuilderStore();
   const field = fields.find((fld) => fld.name === rule.field);
 
   switch (field?.datatype) {
     case "text":
-      return <CustomSelectValue rule={rule} ruleIndex={ruleIndex} />;
+      return (
+        <CustomSelectValue
+          rule={rule}
+          ruleIndex={ruleIndex}
+          groupIndex={groupIndex}
+        />
+      );
     case "number":
       const rangeOperators = ["between", "notBetween"];
       if (rangeOperators.includes(rule.operator)) {
-        return <CustomNumberRange ruleIndex={ruleIndex} />;
+        return (
+          <CustomNumberRange ruleIndex={ruleIndex} groupIndex={groupIndex} />
+        );
       } else {
         return (
           <Input
-            onBlur={(e) => setRuleValue(ruleIndex, e.currentTarget.value)}
+            onBlur={(e) =>
+              setRuleValue(ruleIndex, e.currentTarget.value, groupIndex)
+            }
             className="w-fit"
           />
         );
@@ -164,9 +251,21 @@ export function RuleInputValue({
         "next",
       ];
       if (dateRangeOperators.includes(rule.operator)) {
-        return <CustomDateRangePicker rule={rule} ruleIndex={ruleIndex} />;
+        return (
+          <CustomDateRangePicker
+            rule={rule}
+            ruleIndex={ruleIndex}
+            groupIndex={groupIndex}
+          />
+        );
       } else {
-        return <CustomDatePicker rule={rule} ruleIndex={ruleIndex} />;
+        return (
+          <CustomDatePicker
+            rule={rule}
+            ruleIndex={ruleIndex}
+            groupIndex={groupIndex}
+          />
+        );
       }
   }
 }
@@ -174,9 +273,11 @@ export function RuleInputValue({
 export function CustomSelectValue({
   rule,
   ruleIndex,
+  groupIndex,
 }: {
   rule: RuleType;
   ruleIndex: number;
+  groupIndex?: number[];
 }) {
   const [value, setValue] = useState("");
   const [open, setOpen] = useState(true);
@@ -187,7 +288,7 @@ export function CustomSelectValue({
   function handleSelect(item: any) {
     if (typeof item == "string") {
       setValue(item);
-      setRuleValue(ruleIndex, item);
+      setRuleValue(ruleIndex, item, groupIndex ?? undefined);
       setOpen(false);
       return;
     } else {
@@ -201,6 +302,7 @@ export function CustomSelectValue({
         item[rule.field]?.toString() ||
           item["profile"]?.[rule.field.split(".")?.[1]] ||
           "",
+        groupIndex ?? undefined,
       );
       setOpen(false);
     }
@@ -307,14 +409,20 @@ export function CustomSelectValue({
   );
 }
 
-export function RuleDeleteButton({ ruleIndex }: { ruleIndex: number }) {
+export function RuleDeleteButton({
+  ruleIndex,
+  groupIndex,
+}: {
+  ruleIndex: number;
+  groupIndex?: number[];
+}) {
   const { deleteRule } = QueryBuilderStore();
 
   return (
     <Button
       size={"icon"}
       variant={"ghost"}
-      onClick={() => deleteRule(ruleIndex)}
+      onClick={() => deleteRule(ruleIndex, groupIndex)}
       className="group w-10"
     >
       <TrashIcon className="h-5 w-5 text-muted-foreground group-hover:text-red-500" />
@@ -322,13 +430,19 @@ export function RuleDeleteButton({ ruleIndex }: { ruleIndex: number }) {
   );
 }
 
-export function CustomNumberRange({ ruleIndex }: { ruleIndex: number }) {
+export function CustomNumberRange({
+  ruleIndex,
+  groupIndex,
+}: {
+  ruleIndex: number;
+  groupIndex?: number[];
+}) {
   const { setRuleValue } = QueryBuilderStore();
   const [from, setFrom] = useState(0);
   const [to, setTo] = useState(0);
 
   useEffect(() => {
-    setRuleValue(ruleIndex, `${from}-${to}`);
+    setRuleValue(ruleIndex, `${from}-${to}`, groupIndex);
   }, [from, to]);
 
   return (
