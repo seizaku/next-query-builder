@@ -3,7 +3,7 @@ import { columns } from "./_components/columns";
 import { User } from "./_components/columns";
 import { CustomQueryBuilder } from "./_components/query-builder/query-builder";
 import { Query } from "./_components/query";
-import { ControlRule } from "./_components/control-rule";
+import { ControlRule } from "./_components/query-builder/control-rule";
 import { fields } from "@/config/fields";
 
 export const dynamic = "force-dynamic";
