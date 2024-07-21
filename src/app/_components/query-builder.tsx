@@ -72,6 +72,7 @@ export function CustomQueryBuilder() {
           console.log(groupIndex);
           return (
             <div
+              key={rule.id}
               className={cn(
                 "border-t-none rounded-xl rounded-t-none border p-4",
                 isNotLastElement && "rounded-b-none",
