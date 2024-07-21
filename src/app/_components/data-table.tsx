@@ -38,7 +38,9 @@ export function UserDataTable<TData, TValue>({
   const { query } = QueryBuilderStore();
 
   const table = useReactTable({
-    data: query.rules.some((item) => item.value?.toString()?.trim() != "")
+    data: query.rules.some(
+      (item) => (item as any).value?.toString()?.trim() != "",
+    )
       ? queryResults
       : users, // If there are filters, then display the query results
     columns,
