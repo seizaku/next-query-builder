@@ -14,10 +14,14 @@ type Query = RuleGroupType;
 type QueryStoreProps = {
   query: Query;
   recentField?: Field;
+  clearAll: () => void;
   setQueryRules: (query: Array<RuleType | RuleGroupType>) => void;
   addRule: (fieldName: string, groupIndex?: number[] | undefined) => void;
   addGroup: (groupIndex?: number[] | undefined) => void;
-  setCombinator: (combinator: "and" | "or", groupIndex?: number[] | undefined) => void;
+  setCombinator: (
+    combinator: "and" | "or",
+    groupIndex?: number[] | undefined,
+  ) => void;
   setRuleField: (
     index: number,
     fieldName: string,
@@ -50,22 +54,39 @@ export const isRuleGroupType = (
   return (item as RuleGroupType).combinator !== undefined;
 };
 
+// Create a Zustand store for managing query builder state
 export const QueryBuilderStore = create<QueryStoreProps>((set, get) => ({
   query: {
     combinator: "and",
     rules: [],
   },
+
+  // Set the entire query rules
   setQueryRules: (rules) => {
-    set({ query: {
-      ...get().query,
-      rules
-    } });
+    set({
+      query: {
+        ...get().query,
+        rules,
+      },
+    });
   },
 
+  // Clear all rules and reset the query
+  clearAll: () => {
+    set({
+      query: {
+        combinator: "and",
+        rules: [],
+      },
+    });
+  },
+
+  // Add a new rule to the query
   addRule: (fieldName, groupIndex) => {
     const query = get().query;
     const operator = getOperators(fieldName)[0].name;
 
+    // Add rule to the top-level rules if no groupIndex is provided
     if (!groupIndex?.length) {
       query.rules.push({ field: fieldName, operator, value: "" });
       set({
@@ -75,6 +96,7 @@ export const QueryBuilderStore = create<QueryStoreProps>((set, get) => ({
       return;
     }
 
+    // Add rule to a specific group
     const group = query.rules[groupIndex[0]];
     if (isRuleGroupType(group)) {
       group.rules.push({ field: fieldName, operator, value: "" });
@@ -85,10 +107,12 @@ export const QueryBuilderStore = create<QueryStoreProps>((set, get) => ({
     }
   },
 
+  // Add a new group of rules to the query
   addGroup: (groupIndex) => {
     const query = get().query;
     const newGroup: RuleGroupType = { combinator: "and", rules: [] };
 
+    // Add group to the top-level rules if groupIndex is empty
     if (groupIndex?.length === 0) {
       query.rules.push(newGroup);
     }
@@ -96,10 +120,12 @@ export const QueryBuilderStore = create<QueryStoreProps>((set, get) => ({
     set({ query });
   },
 
+  // Set the combinator (AND/OR) for a group or the top-level query
   setCombinator: (combinator, groupIndex) => {
     const { getUserData } = UserDataStore.getState();
     const query = get().query;
 
+    // Set combinator for the top-level query if no groupIndex is provided
     if (!groupIndex?.length) {
       query.combinator = combinator;
       set({ query });
@@ -107,6 +133,7 @@ export const QueryBuilderStore = create<QueryStoreProps>((set, get) => ({
       return;
     }
 
+    // Set combinator for a specific group
     const group = query.rules[groupIndex[0]];
     if (isRuleGroupType(group)) {
       group.combinator = combinator;
@@ -116,11 +143,13 @@ export const QueryBuilderStore = create<QueryStoreProps>((set, get) => ({
     }
   },
 
+  // Set the field for a specific rule
   setRuleField: (index, fieldName, groupIndex) => {
     const { getUserData } = UserDataStore.getState();
     const query = get().query;
     const operator = getOperators(fieldName)[0].name;
 
+    // Set field for a rule at the top level if no groupIndex is provided
     if (!groupIndex?.length) {
       query.rules[index] = { field: fieldName, operator, value: undefined };
       set({
@@ -131,6 +160,7 @@ export const QueryBuilderStore = create<QueryStoreProps>((set, get) => ({
       return;
     }
 
+    // Set field for a rule within a group
     const group = query.rules[groupIndex[0]];
     if (isRuleGroupType(group)) {
       group.rules[groupIndex[1]] = {
@@ -147,11 +177,12 @@ export const QueryBuilderStore = create<QueryStoreProps>((set, get) => ({
     }
   },
 
+  // Set the operator for a specific rule
   setRuleOperator: (index, operator, groupIndex) => {
     const { getUserData } = UserDataStore.getState();
     const query = get().query;
 
-    // Handle direct rule update
+    // Handle operator update for a rule at the top level
     if (!groupIndex?.length && isRuleType(query.rules[index])) {
       query.rules[index] = {
         ...query.rules[index],
@@ -163,6 +194,7 @@ export const QueryBuilderStore = create<QueryStoreProps>((set, get) => ({
       return;
     }
 
+    // Handle operator update for a rule within a group
     if (groupIndex?.length !== 2) return;
 
     const group = query.rules[groupIndex[0]];
@@ -179,10 +211,12 @@ export const QueryBuilderStore = create<QueryStoreProps>((set, get) => ({
     }
   },
 
+  // Set the value for a specific rule
   setRuleValue: (index, value, groupIndex) => {
     const { getUserData } = UserDataStore.getState();
     const query = get().query;
 
+    // Update value for a rule at the top level
     if (
       !groupIndex?.length &&
       isRuleType(query.rules[index]) &&
@@ -194,6 +228,7 @@ export const QueryBuilderStore = create<QueryStoreProps>((set, get) => ({
       return;
     }
 
+    // Update value for a rule within a group
     if (groupIndex?.length !== 2) return;
 
     const group = query.rules[groupIndex[0]];
@@ -209,10 +244,12 @@ export const QueryBuilderStore = create<QueryStoreProps>((set, get) => ({
     }
   },
 
+  // Delete a specific rule
   deleteRule: (index, groupIndex) => {
     const { getUserData } = UserDataStore.getState();
     const query = get().query;
 
+    // Delete rule from top-level rules
     if (!groupIndex?.length && isRuleType(query.rules[index])) {
       query.rules.splice(index, 1);
       set({ query });
@@ -220,6 +257,7 @@ export const QueryBuilderStore = create<QueryStoreProps>((set, get) => ({
       return;
     }
 
+    // Delete rule from a specific group
     if (groupIndex?.length !== 2) return;
     const group = query.rules[groupIndex[0]];
     if (!isRuleGroupType(group)) return;
