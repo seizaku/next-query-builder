@@ -37,7 +37,7 @@ export const UserDataStore = create<UserStoreProps>((set, get) => ({
       
       // Format the current query into JSON format
       const query = QueryBuilderStore.getState().query;
-      if (query.rules.find((rule) => rule.value == undefined)) return;
+      if (query.rules.find((rule) => rule.value == '')) return;
 
       const jsonQuery = formatQuery(query, "json");
 
