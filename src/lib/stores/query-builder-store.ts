@@ -1,7 +1,8 @@
 import { create } from "zustand";
-import { getOperators } from "@/app/_components/query-builder";
 import { UserDataStore } from "./user-data-store";
-import { RuleType } from "react-querybuilder";
+import { Field, RuleType } from "react-querybuilder";
+import { fields } from "@/config/fields";
+import { getOperators } from "../helpers/get-operators";
 
 type Query = {
   combinator: "and" | "or";
@@ -10,7 +11,9 @@ type Query = {
 
 type QueryStoreProps = {
   query: Query;
+  recentField?: Field;
   addRule: (fieldName: string) => void;
+  addGroup: () => void;
   setCombinator: (combinator: "and" | "or") => void;
   setRuleField: (index: number, fieldName: string) => void;
   setRuleOperator: (index: number, operator: string) => void;
@@ -35,9 +38,24 @@ export const QueryBuilderStore = create<QueryStoreProps>((set, get) => ({
     const query = get().query;
     const operator = getOperators(fieldName)[0].name;
     query.rules.push({ field: fieldName, operator, value: "" });
-    set({ query });
+    set({ query, recentField: fields.find((field) => field.name==fieldName) });
   },
-  
+
+  addGroup: (groupIndex = []) => {
+    // const query = get().query;
+    // const newGroup: RuleGroupType = { combinator: "and", rules: [] };
+
+    // if (groupIndex.length === 0) {
+    //   query.rules.push(newGroup);
+    // } else {
+    //   updateGroup(query, groupIndex, (group) => {
+    //     group.rules.push(newGroup);
+    //   });
+    // }
+
+    // set({ query });
+  },
+
   /**
    * Sets the combinator (AND/OR) for the query.
    * @param combinator - The combinator to set.
@@ -60,7 +78,7 @@ export const QueryBuilderStore = create<QueryStoreProps>((set, get) => ({
     const query = get().query;
     const operator = getOperators(fieldName)[0].name;
     query.rules[index] = { field: fieldName, operator, value: undefined };
-    set({ query });
+    set({ query, recentField: fields.find((field) => field.name==fieldName) });
     getUserData();
   },
   
@@ -75,10 +93,7 @@ export const QueryBuilderStore = create<QueryStoreProps>((set, get) => ({
     query.rules[index].operator = operator;
     query.rules[index].value = undefined;
     set({ query });
-    if (query.rules[index].value != undefined && query.rules[index].hasOwnProperty('value')) {
-      console.log("HAS PROP")
-      getUserData();
-    }
+    getUserData();
   },
   
   /**
