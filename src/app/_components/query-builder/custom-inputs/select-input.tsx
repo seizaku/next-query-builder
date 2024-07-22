@@ -134,8 +134,9 @@ export function CustomSelectInput({
                 </>
               ) : (
                 <>
-                  {data.map((item: any) => (
+                  {data.map((item: any, index: number) => (
                     <Button
+                      key={`select-${index}`}
                       onClick={() => handleSelect(item)}
                       variant={"ghost"}
                       className="w-full justify-start text-xs font-medium"
