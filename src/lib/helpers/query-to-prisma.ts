@@ -188,13 +188,12 @@ export function convertToPrismaQuery(query: Query): any {
         }
       })();
 
-      const isArray = typedValue.includes(", ") ? Array.isArray(typedValue.split(', ')) : false;
-      const startValue = isArray ? typedValue[0] : typedValue;
+      const isArray = typedValue?.toString()?.includes(", ") ? Array.isArray(typedValue.split(', ')) : false;
+      const startValue = Array.isArray(typedValue) ? typedValue[0] : typedValue;
       const endValue =
-        isArray && typedValue.length > 1 ? typedValue[1] : undefined;
+        Array.isArray(typedValue) && typedValue.length > 1 ? typedValue[1] : undefined;
 
       const _field = field.includes(".") ? field.split(".") : ["", field];
-
       const condition: any = (() => {
         if (fieldData.datatype === "date") {
           return buildDateRangeCondition(
