@@ -188,7 +188,7 @@ export function convertToPrismaQuery(query: Query): any {
         }
       })();
 
-      const isArray = Array.isArray(typedValue);
+      const isArray = typedValue.includes(", ") ? Array.isArray(typedValue.split(', ')) : false;
       const startValue = isArray ? typedValue[0] : typedValue;
       const endValue =
         isArray && typedValue.length > 1 ? typedValue[1] : undefined;
@@ -207,9 +207,9 @@ export function convertToPrismaQuery(query: Query): any {
 
         switch (operator) {
           case "=":
-            return { [_field[1]]: typedValue };
+            return { [_field[1]]: { in: isArray ? typedValue.split(', ') : [typedValue] } };
           case "!=":
-            return { [_field[1]]: { not: typedValue } };
+            return { [_field[1]]: { notIn: isArray ? typedValue.split(', ') : [typedValue] } };
           case "<":
             return { [_field[1]]: { lt: typedValue } };
           case ">":

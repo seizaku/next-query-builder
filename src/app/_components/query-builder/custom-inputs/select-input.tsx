@@ -6,6 +6,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Checkbox } from "@/components/ui/checkbox"; // Import ShadcnUI Checkbox component
 import { QueryBuilderStore } from "@/lib/stores/query-builder-store";
 import { UserDataStore } from "@/lib/stores/user-data-store";
 import { cn } from "@/lib/utils";
@@ -22,47 +23,72 @@ export function CustomSelectInput({
   ruleIndex: number;
   groupIndex?: number[];
 }) {
-  const [value, setValue] = useState("");
+  const [selectedValues, setSelectedValues] = useState<string[]>([]);
   const [open, setOpen] = useState(true);
   const [search, setSearchValue] = useState("");
   const { users } = UserDataStore();
   const { setRuleValue } = QueryBuilderStore();
 
   function handleSelect(item: any) {
-    if (typeof item == "string") {
-      setValue(item);
-      setRuleValue(ruleIndex, item, groupIndex ?? undefined);
-      setOpen(false);
-      return;
+    let newValue: string;
+    if (typeof item === "string") {
+      newValue = item;
     } else {
-      setValue(
+      newValue =
         item[rule.field]?.toString() ||
-          item["profile"]?.[rule.field.split(".")?.[1]] ||
-          "",
-      );
-      setRuleValue(
-        ruleIndex,
-        item[rule.field]?.toString() ||
-          item["profile"]?.[rule.field.split(".")?.[1]] ||
-          "",
-        groupIndex ?? undefined,
-      );
-      setOpen(false);
+        item["profile"]?.[rule.field.split(".")?.[1]] ||
+        "";
     }
+
+    // Toggle selection
+    setSelectedValues((prevValues) =>
+      prevValues.includes(newValue)
+        ? prevValues.filter((value) => value !== newValue)
+        : [...prevValues, newValue],
+    );
+  }
+
+  const data = users?.filter((item: any) => {
+    return (
+      item[rule.field]?.toLowerCase()?.includes(search?.toLowerCase()) ||
+      item["profile"]?.[rule.field.split(".")?.[1]]
+        ?.toLowerCase()
+        ?.includes(search?.toLowerCase())
+    );
+  });
+
+  function applySelection() {
+    // Update the rule value with the selected values
+    if (!data.length && !selectedValues.some((item) => item == search)) {
+      setSelectedValues((prev) => [...prev, search]);
+    }
+    setRuleValue(ruleIndex, selectedValues.join(", "), groupIndex ?? undefined);
+    setOpen(false);
   }
 
   useEffect(() => {
-    setValue("");
+    // Reset selected values if the rule operator changes
+    setSelectedValues([]);
   }, [rule.operator]);
 
   const display =
-    rule.operator == "null" || rule.operator == "notNull" ? "hidden" : "block";
+    rule.operator === "null" || rule.operator === "notNull"
+      ? "hidden"
+      : "block";
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant={"outline"} className={cn("my-2 w-fit", display)}>
-          {!!value.length ? value : "Select value"}
+        <Button
+          variant={"outline"}
+          className={cn(
+            "my-2 w-fit max-w-full overflow-hidden text-ellipsis",
+            display,
+          )}
+        >
+          {selectedValues.length > 0
+            ? selectedValues.join(", ")
+            : "Select values"}
         </Button>
       </PopoverTrigger>
       <PopoverContent
@@ -81,66 +107,73 @@ export function CustomSelectInput({
         <div className="divided-x mt-2 flex pb-12">
           <ScrollArea className="max-h-[320px] w-full">
             <div className="pt-2">
-              {/* If the current field selected is Sex, show only two values */}
-              {rule.field == "profile.sex" ? (
+              {rule.field === "profile.sex" ? (
                 <>
                   <Button
-                    onClick={() => {
-                      handleSelect("Male");
-                      setOpen(false);
-                    }}
+                    onClick={() => handleSelect("Male")}
                     variant={"ghost"}
                     className="w-full justify-start text-xs font-medium"
                   >
-                    Male
+                    <Checkbox
+                      checked={selectedValues.includes("Male")}
+                      onCheckedChange={() => handleSelect("Male")}
+                    />
+                    <span className="ml-2">Male</span>
                   </Button>
                   <Button
-                    onClick={() => {
-                      handleSelect("Female");
-                      setOpen(false);
-                    }}
+                    onClick={() => handleSelect("Female")}
                     variant={"ghost"}
                     className="w-full justify-start text-xs font-medium"
                   >
-                    Female
+                    <Checkbox
+                      checked={selectedValues.includes("Female")}
+                      onCheckedChange={() => handleSelect("Female")}
+                    />
+                    <span className="ml-2">Female</span>
                   </Button>
                 </>
               ) : (
-                users
-                  ?.filter((item: any) => {
-                    return (
-                      item[rule.field]
-                        ?.toLowerCase()
-                        ?.includes(search?.toLowerCase()) ||
-                      item["profile"]?.[rule.field.split(".")?.[1]]
-                        ?.toLowerCase()
-                        ?.includes(search?.toLowerCase())
-                    );
-                  })
-                  .map((item: any) => (
+                <>
+                  {data.map((item: any) => (
                     <Button
-                      key={item.id} // Ensure each Button has a unique key
-                      onClick={() => {
-                        handleSelect(item);
-                        setOpen(false);
-                      }}
+                      onClick={() => handleSelect(item)}
                       variant={"ghost"}
                       className="w-full justify-start text-xs font-medium"
                     >
-                      {item[rule.field] ||
-                        item["profile"]?.[rule.field.split(".")?.[1]] ||
-                        ""}
+                      <Checkbox
+                        checked={selectedValues.includes(
+                          item[rule.field]?.toString() ||
+                            item["profile"]?.[rule.field.split(".")?.[1]] ||
+                            "",
+                        )}
+                        onCheckedChange={() => handleSelect(item)}
+                      />
+                      <span className="ml-2">
+                        {item[rule.field] ||
+                          item["profile"]?.[rule.field.split(".")?.[1]] ||
+                          ""}
+                      </span>
                     </Button>
-                  ))
+                  ))}
+                  {!data.length && (
+                    <Button
+                      onClick={() => handleSelect(search)}
+                      variant={"ghost"}
+                      className="w-full justify-start text-xs font-medium"
+                    >
+                      <Checkbox
+                        checked={selectedValues.includes(search)}
+                        onCheckedChange={() => handleSelect(search)}
+                      />
+                      <span className="ml-2">{`Specify: ${search}`}</span>
+                    </Button>
+                  )}
+                </>
               )}
             </div>
           </ScrollArea>
           <Button
-            // Set current value state
-            onClick={() => {
-              handleSelect(search);
-              setOpen(false);
-            }}
+            onClick={applySelection}
             size={"lg"}
             className="absolute bottom-0 left-0 w-full rounded-b-xl rounded-t-none"
           >
