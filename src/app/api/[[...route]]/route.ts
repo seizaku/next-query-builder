@@ -15,10 +15,9 @@ app.get('/users', async (c) => {
   
   // If a query is provided, convert it to a Prisma query and fetch users based on the converted query
   if (query) {
-    const prismaQuery = convertToPrismaQuery(JSON.parse(decodeURIComponent(query || "")));
-    
+    const where = convertToPrismaQuery(JSON.parse(decodeURIComponent(query || "")));
     const users = await prisma.user.findMany({
-      where: prismaQuery,
+      where,
       include: {
         profile: true // Include related profile information
       },

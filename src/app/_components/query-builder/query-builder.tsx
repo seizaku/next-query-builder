@@ -3,7 +3,10 @@
 // Import necessary components and hooks
 import { isRuleGroupType, RuleType } from "react-querybuilder";
 import { CustomFilterControl } from "./custom-filter";
-import { QueryBuilderStore } from "@/lib/stores/query-builder-store";
+import {
+  isRuleType,
+  QueryBuilderStore,
+} from "@/lib/stores/query-builder-store";
 import {
   Select,
   SelectContent,
@@ -63,7 +66,7 @@ const renderRule = (rule: any, index: number, groupIndex?: number) => {
 
 // Main CustomQueryBuilder component
 export function CustomQueryBuilder() {
-  const { query } = QueryBuilderStore();
+  const { query, setCombinator } = QueryBuilderStore();
   const hasGroupRule = query?.rules.some((item) => "combinator" in item);
 
   return (
@@ -79,11 +82,11 @@ export function CustomQueryBuilder() {
         </h1>
         <div className="flex flex-col px-6">
           {/* Render rules that contain a 'field' */}
-          {query?.rules
-            .filter((item) => "field" in item)
-            .map((rule, index: number) => {
-              return renderRule(rule, index);
-            })}
+          {query?.rules.map((rule, index: number) => {
+            if (isRuleType(rule)) {
+              return renderRule(rule, index, undefined);
+            }
+          })}
           {/* Render additional filter control */}
           <CustomFilterControl />
         </div>
@@ -95,10 +98,38 @@ export function CustomQueryBuilder() {
             <div
               key={rule.id}
               className={cn(
-                "border-t-none rounded-xl rounded-t-none border p-4",
+                "border-t-none relative rounded-xl rounded-t-none border p-4",
                 isNotLastElement && "rounded-b-none",
+                "groupCombinator" in rule &&
+                  rule.groupCombinator == "or" &&
+                  "mt-14 rounded-t-xl border-t",
               )}
             >
+              {"groupCombinator" in rule && (
+                <div
+                  className={cn(
+                    "absolute left-0 flex w-full justify-center",
+                    "groupCombinator" in rule && rule.groupCombinator == "or"
+                      ? "-top-12"
+                      : "-top-4",
+                  )}
+                >
+                  <Button
+                    onClick={() =>
+                      setCombinator(
+                        rule.groupCombinator == "or" ? "and" : "or",
+                        [groupIndex],
+                        true,
+                      )
+                    }
+                    variant={
+                      rule.groupCombinator == "or" ? "secondary" : "default"
+                    }
+                  >
+                    {rule.groupCombinator?.toUpperCase()}
+                  </Button>
+                </div>
+              )}
               <h1 className="p-2 text-xs font-bold uppercase text-muted-foreground">
                 All Users
               </h1>
@@ -275,11 +306,16 @@ export function RuleDeleteButton({
 }) {
   const { deleteRule } = QueryBuilderStore();
 
+  const deleteRule2 = (ruleIndex: any, groupIndex: any) => {
+    console.log(ruleIndex, groupIndex);
+    deleteRule(ruleIndex, groupIndex);
+  };
+
   return (
     <Button
       size={"icon"}
       variant={"ghost"}
-      onClick={() => deleteRule(ruleIndex, groupIndex)}
+      onClick={() => deleteRule2(ruleIndex, groupIndex)}
       className="group w-10 hover:bg-red-50 dark:hover:bg-red-500/5"
     >
       <TrashIcon className="h-5 w-5 text-muted-foreground group-hover:text-red-500" />

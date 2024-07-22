@@ -2,6 +2,7 @@ import { add, differenceInDays } from "date-fns";
 import { RuleType } from "react-querybuilder";
 import { isValidDate } from "./date-validation";
 import { fields } from "@/config/fields";
+import { RuleGroupType } from "../stores/query-builder-store";
 
 // Define types for query and rule
 interface Query {
@@ -19,6 +20,18 @@ interface NestedRule extends Omit<Rule, "field" | "operator" | "value"> {
   combinator: "and" | "or";
   rules: (Rule | NestedRule)[];
 }
+
+// Type guard to check if an item is a RuleType
+const isRuleType = (item: RuleType | RuleGroupType): item is RuleType => {
+  return (item as RuleType).field !== undefined;
+};
+
+// Type guard to check if an item is a RuleGroupType
+const isRuleGroupType = (
+  item: RuleType | RuleGroupType,
+): item is RuleGroupType => {
+  return (item as RuleGroupType).combinator !== undefined;
+};
 
 /**
  * Builds a date range condition for a given field, date, operator, and optional end date.
@@ -72,8 +85,15 @@ const buildDateRangeCondition = (
         [field]: {
           OR: [
             { [field]: { lt: startOfDay } }, // Dates before the start of the range
-            { [field]: { gt: endDate && isValidDate(endDate.toDateString()) ? endDate : value } } // Dates after the end of the range
-          ]
+            {
+              [field]: {
+                gt:
+                  endDate && isValidDate(endDate.toDateString())
+                    ? endDate
+                    : value,
+              },
+            }, // Dates after the end of the range
+          ],
         },
       };
     case "last":
@@ -112,27 +132,26 @@ const buildDateRangeCondition = (
  * @param query - The query builder query object.
  * @returns An object representing the Prisma query.
  */
+/**
+ * Converts a query builder query to a Prisma query.
+ *
+ * @param query - The query builder query object.
+ * @returns An object representing the Prisma query.
+ */
 export function convertToPrismaQuery(query: Query): any {
   const { combinator, rules } = query;
 
   if (!rules || rules.length === 0) return {};
 
-  /**
-   * Builds the Prisma query from the rules.
-   *
-   * @param rules - The array of rule objects.
-   * @returns An array of conditions for the Prisma query.
-   */
-  const buildPrismaQuery = (rules: (Rule | NestedRule)[]): any[] => {
-    return rules.map((rule: Rule | NestedRule) => {
-      if ("rules" in rule) {
-        // Recursively handle nested rules
-        return convertToPrismaQuery(rule as NestedRule);
+  // Function to build Prisma conditions based on rules
+  const buildPrismaQuery = (rules: Array<RuleType | RuleGroupType>): any[] => {
+    return rules.map((rule) => {
+      if (isRuleGroupType(rule)) {
+        // Recursively handle nested rule groups
+        return convertToPrismaQuery(rule as RuleGroupType);
       }
 
-      const { field, operator, value } = rule as Rule;
-
-      // Ensure value is correctly typed
+      const { field, operator, value } = rule as RuleType;
       const fieldData = fields.find((item) => item.name === field);
       const typedValue = (() => {
         if (!fieldData) {
@@ -156,11 +175,9 @@ export function convertToPrismaQuery(query: Query): any {
             return [];
           case "number":
             const isRange = value?.includes("-");
-
             if (isRange) {
               return value;
             }
-
             const numericValue = Number(value);
             if (!isNaN(numericValue) && isFinite(numericValue)) {
               return numericValue;
@@ -171,7 +188,6 @@ export function convertToPrismaQuery(query: Query): any {
         }
       })();
 
-      // Type guard to ensure typedValue is an array when accessing indices
       const isArray = Array.isArray(typedValue);
       const startValue = isArray ? typedValue[0] : typedValue;
       const endValue =
@@ -179,7 +195,6 @@ export function convertToPrismaQuery(query: Query): any {
 
       const _field = field.includes(".") ? field.split(".") : ["", field];
 
-      // Build the condition based on the operator and typed value
       const condition: any = (() => {
         if (fieldData.datatype === "date") {
           return buildDateRangeCondition(
@@ -230,37 +245,46 @@ export function convertToPrismaQuery(query: Query): any {
               .map((val) => parseInt(val.trim(), 10));
 
             return {
-              OR: [
-                { [_field[1]]: { lt: min } }, // Values less than the minimum
-                { [_field[1]]: { gt: max } }, // Values greater than the maximum
-              ],
+              OR: [{ [_field[1]]: { lt: min } }, { [_field[1]]: { gt: max } }],
             };
           default:
             return {};
         }
       })();
 
-      // Handle nested fields
       if (field.indexOf(".") !== -1) {
         return { [_field[0]]: condition };
       }
-      console.log(condition);
-
       return condition;
     });
   };
+  
+  // Function to determine the top-level combinator
+  const determineTopLevelCombinator = (
+    rules: Array<RuleType | RuleGroupType>,
+  ): "AND" | "OR" => {
+    let topLevelCombinator: "AND" | "OR" = "AND";
 
-  // Build the Prisma query using the rules
-  const prismaQuery = buildPrismaQuery(rules);
+    for (const rule of rules) {
+      if (isRuleGroupType(rule)) {
+        if (rule.groupCombinator === "or") {
+          topLevelCombinator = "OR";
+        } else if (rule.groupCombinator === "and") {
+          const innerCombinator = determineTopLevelCombinator(rule.rules);
+          if (innerCombinator === "OR") {
+            topLevelCombinator = "OR";
+          }
+        }
+      }
+    }
 
-  // Combine conditions using the specified combinator (AND/OR), if there are conditions
-  if (prismaQuery.length > 0) {
-    return combinator === "and"
-      ? { AND: prismaQuery }
-      : combinator === "or"
-        ? { OR: prismaQuery }
-        : prismaQuery[0]; // Return the first condition if no combinator is specified
-  }
+    return topLevelCombinator;
+  };
 
-  return {};
+  const topLevelCombinator = determineTopLevelCombinator(rules);
+
+  // Flatten the conditions into a single array
+  const flattenedConditions = buildPrismaQuery(rules);
+
+  return { [topLevelCombinator]: flattenedConditions };
 }
