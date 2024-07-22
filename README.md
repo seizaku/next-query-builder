@@ -43,3 +43,14 @@ Run the Development Server
 
 ![App Screenshot](https://gcdnb.pbrd.co/images/gvcq8QaZ4Dp8.png?o=1)
 
+
+## Environment Variables
+
+To run this project, you will need to add the following environment variables to your .env file
+
+```env
+POSTGRES_PRISMA_URL=""
+POSTGRES_URL_NON_POOLING=""
+NODEJS_HELPERS=0
+NEXT_PUBLIC_API_URL=http://localhost:3000
+```
