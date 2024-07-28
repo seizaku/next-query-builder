@@ -1,96 +1,88 @@
-import { Pencil1Icon, PersonIcon } from "@radix-ui/react-icons";
-import { ReactNode } from "react";
 import { Field } from "react-querybuilder";
 
 // This contains all the fields that can be queried
-export const fields: Field[] = [
+
+const user: Field[] = [
   {
+    tab: "user",
     name: "name",
     label: "Name",
     datatype: "text",
     inputType: "text",
   },
   {
+    tab: "user",
     name: "email",
     label: "Email",
     datatype: "text",
     inputType: "text",
   },
   {
-    name: "profile.avatar",
+    tab: "user",
+    name: "DATE(updated_at)",
+    label: "Updated",
+    datatype: "date",
+    inputType: "date",
+  },
+  {
+    tab: "user",
+    name: "DATE(created_at)",
+    label: "Created",
+    datatype: "date",
+    inputType: "date",
+  },
+];
+
+const profile: Field[] = [
+  {
+    tab: "profile",
+    name: "avatar",
     label: "AvatarURL",
     datatype: "text",
     inputType: "text",
   },
   {
-    name: "profile.company",
+    tab: "profile",
+    name: "company",
     label: "Company",
     datatype: "text",
     inputType: "text",
   },
   {
-    name: "profile.age",
+    tab: "profile",
+    name: "age",
     label: "Age",
     datatype: "number",
     inputType: "number",
   },
   {
-    name: "profile.sex",
+    tab: "profile",
+    name: "sex",
     label: "Sex",
     datatype: "text",
     inputType: "text",
   },
   {
-    name: "profile.zipCode",
+    tab: "profile",
+    name: "zip_code",
     label: "Zip Code",
     datatype: "text",
     inputType: "text",
   },
   {
-    name: "profile.country",
+    tab: "profile",
+    name: "country",
     label: "Country",
     datatype: "text",
     inputType: "text",
   },
   {
-    name: "profile.state",
+    tab: "profile",
+    name: "state",
     label: "State",
     datatype: "text",
     inputType: "text",
   },
-  {
-    name: "createdAt",
-    label: "Created",
-    datatype: "date",
-    inputType: "date",
-  },
-  {
-    name: "updatedAt",
-    label: "Updated",
-    datatype: "date",
-    inputType: "date",
-  },
 ];
 
-export type Tab = {
-  name: string;
-  prefix: string;
-  icon?: ReactNode;
-};
-
-export const tabs: Tab[] = [
-  {
-    name: "All",
-    prefix: "*",
-  },
-  {
-    name: "User",
-    prefix: "",
-    icon: <PersonIcon className="mr-2 h-3" />,
-  },
-  {
-    name: "Profile",
-    prefix: "profile",
-    icon: <Pencil1Icon className="mr-2 h-3" />,
-  },
-];
+export const fields: Field[] = [...user, ...profile];
