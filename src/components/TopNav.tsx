@@ -16,9 +16,11 @@ import { useEffect, useState } from "react";
 export function Navbar() {
   const { theme, setTheme } = useTheme();
   const [currentTheme, setCurrentTheme] = useState(theme);
+
   useEffect(() => {
     setTheme(currentTheme == "light" ? "dark" : "light");
-  }, [currentTheme]);
+  }, [currentTheme, setTheme]);
+
   return (
     <nav className="sticky left-0 top-0 z-50 flex h-16 w-full items-center border-b bg-background">
       <div className="flex h-full w-full items-center justify-between gap-8 px-8">
