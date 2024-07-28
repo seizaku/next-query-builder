@@ -49,8 +49,13 @@ Run the Development Server
 To run this project, you will need to add the following environment variables to your .env file
 
 ```env
-POSTGRES_PRISMA_URL=""
-POSTGRES_URL_NON_POOLING=""
-NODEJS_HELPERS=0
-NEXT_PUBLIC_API_URL=http://localhost:3000
+# PostgreSQL database password
+POSTGRES_PASSWORD='password'
+
+# PGAdmin credentials
+PGADMIN_DEFAULT_EMAIL='postgres@pgadmin.com'
+PGADMIN_DEFAULT_PASSWORD='postgres'
+
+# PostgREST URL
+POSTGREST_URL='http://127.0.0.1:3333'
 ```
