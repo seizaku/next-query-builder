@@ -58,4 +58,8 @@ PGADMIN_DEFAULT_PASSWORD='postgres'
 
 # PostgREST URL
 POSTGREST_URL='http://127.0.0.1:3333'
+
+# NextJS API URL
+NEXT_PUBLIC_API_URL=http://localhost:3000
+
 ```
