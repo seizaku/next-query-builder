@@ -12,7 +12,13 @@ export function Query() {
       <h1 className="text-sm font-semibold">SQL Query:</h1>
       <pre className="mt-4 text-wrap">
         <p className="mt-2 rounded-xl bg-muted p-4 text-sm">
-          {formatQuery(parseRules(query) as any as any, "sql")}
+          {JSON.stringify(
+            formatQuery(parseRules(query) as any as any, {
+              format: "parameterized",
+              paramPrefix: "$",
+              numberedParams: true,
+            }),
+          )}
         </p>
       </pre>
     </section>
