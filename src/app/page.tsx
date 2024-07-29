@@ -1,5 +1,4 @@
 import { CustomQueryBuilder } from "./_components/query-builder/QueryBuilder";
-import { Query } from "./_components/DisplayQuery";
 import { GroupControl } from "./_components/query-builder/GroupControl";
 import { getRecords } from "@/server/actions/get-records";
 import { Users } from "./_components/Users";
@@ -11,7 +10,6 @@ export default async function Home() {
 
   return (
     <main className="min-h-screen p-8 sm:px-24">
-      <Query />
       <section>
         <h1 className="py-2 text-xl font-bold">Users</h1>
         <h6 className="mb-4 text-xs font-medium text-muted-foreground">
