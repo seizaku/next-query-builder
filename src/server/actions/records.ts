@@ -15,7 +15,7 @@ export async function getRecords(query?: string): Promise<(User & Profile)[]> {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        sql: query ? formatQuery(JSON.parse(query)) : '',
+        q: query ? sanitizeQuery(JSON.parse(query)) : '',
       }),
       cache: 'no-cache'
     });
@@ -33,7 +33,7 @@ export async function getRecords(query?: string): Promise<(User & Profile)[]> {
 }
 
 // Format query
-function formatQuery(queryObj: QueryObject) {
+function sanitizeQuery(queryObj: QueryObject) {
   let { sql, params } = queryObj;
 
   // Replace placeholders with actual values from params
