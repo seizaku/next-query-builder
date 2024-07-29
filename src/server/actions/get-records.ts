@@ -8,15 +8,20 @@ interface QueryObject {
 }
 
 export async function getRecords(query?: string): Promise<(User & Profile)[]> {
-  const url = `${process.env.NEXT_PUBLIC_API_URL}/api/rpc/query`;
-
   try {
-    // Set query to empty string if not provided
-    const parsedQuery = query ? JSON.parse(query) : { sql: '', params: [] };
+    let parsedQuery: QueryObject = { sql: '', params: [] };
+    if (query) {
+      try {
+        parsedQuery = JSON.parse(query);
+      } catch (parseError) {
+        console.error('Failed to parse query:', parseError);
+        return [];
+      }
+    }
+    
     const sanitizedQuery = sanitize.format(parsedQuery?.sql, [...parsedQuery?.params]);
 
-    // Fetch data from the API
-    const res = await fetch(url, {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/rpc/query`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -29,8 +34,14 @@ export async function getRecords(query?: string): Promise<(User & Profile)[]> {
     }
     
     const data = await res.json();
-    
-    return data;
+
+    if (typeof data === 'object' && data !== null) {
+      return data;
+    } else {
+      console.error('Invalid JSON response:', data);
+      return [];
+    }
+
   } catch (error) {
     return [];
   }
