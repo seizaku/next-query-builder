@@ -23,32 +23,12 @@ import { NumberValueEditor } from "./custom-inputs/NumberValueEditor";
 import { TextValueEditor } from "./custom-inputs/TextValueEditor";
 import { fields } from "@/config/fields";
 import { getOperators } from "@/config/operators";
-import { useEffect } from "react";
-
-// Function to render individual rules
-const renderRule = (rule: any, index: number, groupIndex: number) => {
-  return (
-    <div key={`field-${index}`} className="flex flex-wrap items-center gap-2">
-      {/* Display 'where' for the first rule, otherwise show a combinator */}
-      {index == 0 ? (
-        <span className="mr-2 w-12 text-end text-sm font-semibold text-muted-foreground">
-          where
-        </span>
-      ) : (
-        <RuleCombinator groupIndex={[groupIndex]} />
-      )}
-      {/* Render filter control, operators, input value, and delete button */}
-      <FieldSelectorPopover rule={rule} groupIndex={[groupIndex, index]} />
-      <RuleOperators rule={rule} groupIndex={[groupIndex, index]} />
-      <RuleInputValue rule={rule} groupIndex={[groupIndex, index]} />
-      <RuleDeleteButton groupIndex={[groupIndex, index]} />
-    </div>
-  );
-};
+import { GroupCombinator } from "./GroupCombinator";
+import { Rule } from "./Rule";
 
 // Main CustomQueryBuilder component
 export function CustomQueryBuilder() {
-  const { query, setGroupCombinator } = QueryBuilderStore();
+  const { query } = QueryBuilderStore();
 
   return (
     <>
@@ -57,71 +37,43 @@ export function CustomQueryBuilder() {
         const nextGroupCombinatorIsOr =
           (query.rules[groupIndex + 1] as any)?.groupCombinator === "or";
 
-        const getBorderRadiusClass = () =>
-          cn(
-            "border-t-none relative rounded-xl rounded-t-none border p-4",
-            isNotLastElement && "rounded-b-none",
-            "groupCombinator" in rule &&
-              rule.groupCombinator == "or" &&
-              "mt-14 rounded-t-xl border-t",
-            groupIndex == 0 && "rounded-t-xl",
-          );
-
-        const getCombinatorClass = () =>
-          "groupCombinator" in rule && rule.groupCombinator === "or"
-            ? "mt-14 rounded-t-xl border-t"
-            : "";
-
-        const getButtonClass = () =>
-          "groupCombinator" in rule && rule.groupCombinator === "or"
-            ? "secondary"
-            : "default";
-
-        const getButtonPositionClass = () =>
-          "groupCombinator" in rule && rule.groupCombinator === "or"
-            ? "-top-12"
-            : "-top-4";
+        const RuleGroupClassName = () => {
+          if ("rules" in rule)
+            return cn(
+              "relative rounded-xl rounded-t-none border p-4",
+              isNotLastElement && "rounded-b-none",
+              (rule.groupCombinator === "or" || groupIndex === 0) &&
+                "rounded-t-xl",
+              rule.groupCombinator === "or" && "mt-14 border-t",
+            );
+        };
 
         return (
           <div
             key={`group-${groupIndex}`}
             className={cn(
               "border-t-none relative rounded-xl border p-4",
-              getBorderRadiusClass(),
-              getCombinatorClass(),
+              RuleGroupClassName(),
               nextGroupCombinatorIsOr && "rounded-b-xl",
             )}
           >
-            {"groupCombinator" in rule && (
-              <div
-                className={cn(
-                  "absolute left-0 flex w-full justify-center",
-                  getButtonPositionClass(),
-                )}
-              >
-                <Button
-                  onClick={() =>
-                    setGroupCombinator(
-                      rule.groupCombinator === "or" ? "and" : "or",
-                      [groupIndex],
-                    )
-                  }
-                  variant={getButtonClass()}
-                >
-                  {rule.groupCombinator?.toUpperCase()}
-                </Button>
-              </div>
-            )}
+            <GroupCombinator groupIndex={groupIndex} rule={rule} />
             <h1 className="p-2 text-xs font-bold uppercase text-muted-foreground">
               All Users
             </h1>
             <div className="flex flex-col px-6">
               {"rules" in rule &&
+                isRuleType(rule) &&
                 rule.rules
                   ?.filter((item) => "field" in item)
-                  .map((innerRule, index) =>
-                    renderRule(innerRule, index, groupIndex),
-                  )}
+                  .map((innerRule, index) => (
+                    <Rule
+                      key={innerRule.id}
+                      groupIndex={groupIndex}
+                      index={index}
+                      rule={rule}
+                    />
+                  ))}
               <FieldSelectorPopover groupIndex={[groupIndex]} />
             </div>
           </div>
