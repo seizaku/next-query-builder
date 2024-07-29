@@ -53,7 +53,6 @@ export function DateValueEditor({
         groupIndex,
       );
     }
-    console.log("Update");
   }, [date]);
 
   return (
