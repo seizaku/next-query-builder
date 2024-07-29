@@ -24,12 +24,10 @@ export function Users({ initialData }: { initialData: Array<User & Profile> }) {
     const formattedQuery = JSON.stringify(
       formatQuery(parseRules(query as any) as any, {
         format: "parameterized",
-        paramPrefix: "$",
-        numberedParams: true,
       }),
     );
     mutate(formattedQuery);
-  }, [JSON.stringify(query.rules).length]);
+  }, [JSON.stringify(query.rules)]);
 
   // Set initial record on first server side fetch
   useEffect(() => {
