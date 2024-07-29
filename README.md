@@ -49,6 +49,8 @@ Run the Development Server
 To run this project, you will need to add the following environment variables to your .env file
 
 ```env
+Local Environment:
+
 # PostgreSQL database password
 POSTGRES_PASSWORD='password'
 
@@ -56,8 +58,16 @@ POSTGRES_PASSWORD='password'
 PGADMIN_DEFAULT_EMAIL='postgres@pgadmin.com'
 PGADMIN_DEFAULT_PASSWORD='postgres'
 
-# PostgREST URL
-POSTGREST_URL='http://127.0.0.1:3333'
+# PostgREST URL to be used by Next.js
+POSTGREST_URL='http://127.0.0.1:8080'
+
+# PostgREST config
+PGRST_DB_URI="postgres://postgres:password@db:5432/postgres"
+PGRST_DB_SCHEMA="public"
+PGRST_DB_ANON_ROLE="user"
+
+# GCP Deployment
+PORT=8080
 
 # NextJS API URL
 NEXT_PUBLIC_API_URL=http://localhost:3000
