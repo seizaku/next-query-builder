@@ -16,16 +16,11 @@ Clone the repository:
 Install Dependencies
    ```sh
     npm install
-    yarn install
-    pnpm install
-    bun install
 ```
 
 Run the Development Server
    ```sh
     npm run dev
-    yarn dev 
-    pnpm dev bun dev
 ```
 
 ## Docker Compose
