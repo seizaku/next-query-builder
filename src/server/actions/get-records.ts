@@ -24,44 +24,14 @@ export async function getRecords(query?: string): Promise<(User & Profile)[]> {
       body: JSON.stringify({ q: sanitizedQuery }),
     });
 
-    console.log( sanitizedQuery)
     if (!res.ok) {
-      console.error(`Error fetching users: ${res.statusText} (Status Code: ${res.status})`);
       return [];
     }
-
-    return await res.json();
+    
+    const data = await res.json();
+    
+    return data;
   } catch (error) {
-    console.error("Failed to fetch data:", error);
     return [];
   }
 }
-
-
-
-// Prevent SQL injection
-function escapeLiteral(str: string) {
-  var hasBackslash = false;
-  var escaped = "'";
-
-  for (var i = 0; i < str.length; i++) {
-    var c = str[i];
-    if (c === "'") {
-      escaped += c + c; // Escapes single quotes
-    } else if (c === '\\') {
-      escaped += c + c; // Escapes backslashes
-      hasBackslash = true;
-    } else {
-      escaped += c;
-    }
-  }
-
-  escaped += "'";
-
-  if (hasBackslash === true) {
-    escaped = ' E' + escaped; // Prefix with E for escape sequences if there are backslashes
-  }
-
-  return escaped;
-}
-
