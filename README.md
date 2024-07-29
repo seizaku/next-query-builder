@@ -38,6 +38,11 @@ Run the Development Server
     pnpm dev bun dev
 ```
 
+Run Docker Compose
+   ```sh
+   docker-compose -f docker-compose.yml up
+```
+
 
 ## Screenshots
 
