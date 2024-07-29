@@ -1,6 +1,6 @@
 "use server";
 import { User, Profile } from "@/types/index";
-const { sanitize } = require("perfect-express-sanitizer");
+var sanitize = require('sqlstring');
 
 interface QueryObject {
   sql: string;
@@ -12,11 +12,8 @@ export async function getRecords(query?: string): Promise<(User & Profile)[]> {
 
   try {
     // Set query to empty string if not provided
-    const sanitizedQuery = query ? JSON.parse(query) : { sql: '', params: [] };
-    const formattedQuery = formatQuery(sanitizedQuery);
-
-    const options = { xss: true, noSql: true, sql: true, level: 3 };
-    const sanitizedInput = sanitize.prepareSanitize(formattedQuery, options);
+    const parsedQuery = query ? JSON.parse(query) : { sql: '', params: [] };
+    const sanitizedQuery = sanitize.format(parsedQuery?.sql, [...parsedQuery?.params]);
 
     // Fetch data from the API
     const res = await fetch(url, {
@@ -24,10 +21,10 @@ export async function getRecords(query?: string): Promise<(User & Profile)[]> {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ q: query ? formattedQuery : '' }),
+      body: JSON.stringify({ q: sanitizedQuery }),
     });
-    console.log(sanitizedInput);
 
+    console.log( sanitizedQuery)
     if (!res.ok) {
       console.error(`Error fetching users: ${res.statusText} (Status Code: ${res.status})`);
       return [];
@@ -40,24 +37,9 @@ export async function getRecords(query?: string): Promise<(User & Profile)[]> {
   }
 }
 
-// Format query by replacing placeholders with actual values
-function formatQuery(queryObj: QueryObject) {
-  let { sql, params } = queryObj;
-
-  // Replace placeholders with actual values from params
-  // Assumes that params are properly escaped
-  for (let i = 0; i < params.length; i++) {
-    let paramPlaceholder = `$${i + 1}`;
-    let paramValue = escapeLiteral(params[i]);
-
-    // Replace each placeholder with the corresponding parameter value
-    sql = sql.replace(paramPlaceholder, paramValue);
-  }
-
-  return sql;
-}
 
 
+// Prevent SQL injection
 function escapeLiteral(str: string) {
   var hasBackslash = false;
   var escaped = "'";

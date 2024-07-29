@@ -26,11 +26,11 @@
     "next": "14.2.5",
     "next-postgrest": "^0.1.9",
     "next-themes": "^0.3.0",
-    "perfect-express-sanitizer": "^2.0.2",
     "react": "^18",
     "react-day-picker": "^8.10.1",
     "react-dom": "^18",
     "react-querybuilder": "^7.6.0",
+    "sqlstring": "^2.3.3",
     "tailwind-merge": "^2.4.0",
     "tailwindcss-animate": "^1.0.7",
     "zustand": "^4.5.4"
