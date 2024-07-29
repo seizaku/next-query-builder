@@ -7,14 +7,16 @@ interface QueryObject {
 
 export async function getRecords(query?: string): Promise<(User & Profile)[]> {
   try {
-    const url = new URL(`${process.env.NEXT_PUBLIC_API_URL}/api/rpc/query`);
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/api/rpc/query`;
 
-    if (query) {
-      // format and Sanitize
-      url.searchParams.append('q', formatQuery(JSON.parse(query)));
-    }
-
-    const res = await fetch(url.toString(), {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        sql: query ? formatQuery(JSON.parse(query)) : '',
+      }),
       cache: 'no-cache'
     });
 

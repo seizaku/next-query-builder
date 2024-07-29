@@ -11,7 +11,7 @@ import { User, Profile } from "@/types/index";
 import { parseRules } from "@/lib/helpers/parse-rules";
 
 export function Users({ initialData }: { initialData: Array<User & Profile> }) {
-  const { setUserData, setRefetchCallback } = UserStore();
+  const { setUserData } = UserStore();
   const { query } = QueryBuilderStore();
 
   useEffect(() => {
@@ -33,10 +33,6 @@ export function Users({ initialData }: { initialData: Array<User & Profile> }) {
     initialData,
     refetchOnWindowFocus: false,
   });
-
-  useEffect(() => {
-    setRefetchCallback(refetch);
-  }, [refetch, setRefetchCallback]);
 
   return <DataTable isPending={isRefetching} columns={columns} data={data} />;
 }
