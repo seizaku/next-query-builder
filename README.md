@@ -6,9 +6,8 @@ You can see a live demo at https://seizaku-query-builder.vercel.app/
 ## Tech Stack
 
 - Next.js - React framework for server-side rendering and static site generation.
-- Prisma - ORM for database management.
 - PostgreSQL - Relational database system.
-- Hono - Backend framework for building APIs.
+- PostgREST - A web server that automatically turns your PostgreSQL database into a RESTful API.
 - TailwindCSS - Utility-first CSS framework for styling.
 - ShadcnUI - Component library for building user interfaces.
 
