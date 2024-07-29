@@ -65,8 +65,6 @@ POSTGREST_URL='http://127.0.0.1:8080'
 PGRST_DB_URI="postgres://postgres:password@db:5432/postgres"
 PGRST_DB_SCHEMA="public"
 PGRST_DB_ANON_ROLE="user"
-
-# GCP Deployment
 PORT=8080
 
 # NextJS API URL
