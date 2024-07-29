@@ -1,3 +1,4 @@
+"use client";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -13,7 +14,6 @@ import {
   addMonths,
   addWeeks,
   differenceInDays,
-  format,
   subDays,
   subHours,
   subMonths,
@@ -22,12 +22,7 @@ import {
 import { Calendar } from "@/components/ui/calendar";
 import { RuleType } from "react-querybuilder";
 
-import {
-  isRuleGroupType,
-  isRuleType,
-  QueryBuilderStore,
-} from "@/lib/stores/query-store";
-import { RuleGroupType } from "@/types";
+import { QueryBuilderStore } from "@/lib/stores/query-store";
 import { DateRange } from "react-day-picker";
 import { Select } from "@radix-ui/react-select";
 import {
@@ -58,6 +53,7 @@ export function DateValueEditor({
         groupIndex,
       );
     }
+    console.log("Update");
   }, [date]);
 
   return (
