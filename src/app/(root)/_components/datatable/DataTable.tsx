@@ -25,16 +25,12 @@ interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   isPending: boolean;
-  isRefetchError: boolean;
-  initialData: TData[];
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
   isPending,
-  isRefetchError,
-  initialData,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnVisibility] = useState({
@@ -42,7 +38,7 @@ export function DataTable<TData, TValue>({
   });
 
   const table = useReactTable({
-    data: isRefetchError ? data : initialData,
+    data: data,
     columns,
     onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
