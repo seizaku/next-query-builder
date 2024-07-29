@@ -39,7 +39,7 @@ Run the Development Server
 
 Run Docker Compose
    ```sh
-   docker-compose up
+   docker-compose up -d
 ```
 
 
