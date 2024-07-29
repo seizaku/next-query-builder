@@ -1,6 +1,3 @@
-"use client";
-import { useTheme } from "next-themes";
-
 export function MixpanelLogo({ mode }: { mode: string }) {
   return (
     <svg
