@@ -1,3 +1,4 @@
+'use server'
 import { User, Profile } from "@/types/index";
 
 interface QueryObject {

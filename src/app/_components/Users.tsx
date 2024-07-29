@@ -20,8 +20,8 @@ export function Users({ initialData }: { initialData: Array<User & Profile> }) {
 
   const { isRefetching, data, refetch } = useQuery({
     queryKey: ["user_profiles", query],
-    queryFn: () =>
-      getRecords(
+    queryFn: async () =>
+      await getRecords(
         JSON.stringify(
           formatQuery(parseRules(query) as any as any, {
             format: "parameterized",
