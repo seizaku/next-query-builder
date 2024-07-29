@@ -63,7 +63,6 @@ export function CustomQueryBuilder() {
             </h1>
             <div className="flex flex-col px-6">
               {"rules" in rule &&
-                isRuleType(rule) &&
                 rule.rules
                   ?.filter((item) => "field" in item)
                   .map((innerRule, index) => (
@@ -71,7 +70,7 @@ export function CustomQueryBuilder() {
                       key={innerRule.id}
                       groupIndex={groupIndex}
                       index={index}
-                      rule={rule}
+                      rule={innerRule}
                     />
                   ))}
               <FieldSelectorPopover groupIndex={[groupIndex]} />
