@@ -1,17 +1,8 @@
 # Next.js Custom Query Builder
 
-This is a Next.js project featuring a custom query builder. It provides an intuitive interface for managing complex queries with dynamic filters, date pickers, and search features.
+This repository contains a Next.js project featuring a custom query builder. It provides an intuitive interface for managing complex queries with dynamic filters, date pickers, and search features.
 
 You can see a live demo at https://seizaku-query-builder.vercel.app/
-## Tech Stack
-
-- Next.js - React framework for server-side rendering and static site generation.
-- PostgreSQL - Relational database system.
-- PostgREST - A web server that automatically turns your PostgreSQL database into a RESTful API.
-- TailwindCSS - Utility-first CSS framework for styling.
-- ShadcnUI - Component library for building user interfaces.
-
-
 
 ## Installation
 
@@ -37,16 +28,11 @@ Run the Development Server
     pnpm dev bun dev
 ```
 
-Run Docker Compose
+## Docker Compose
+
    ```sh
    docker-compose up -d
 ```
-
-
-## Screenshots
-
-![App Screenshot](https://gcdnb.pbrd.co/images/gvcq8QaZ4Dp8.png?o=1)
-
 
 ## Environment Variables
 
@@ -75,3 +61,18 @@ PORT=8080
 NEXT_PUBLIC_API_URL=http://localhost:3000
 
 ```
+
+## Screenshots
+
+![App Screenshot](https://gcdnb.pbrd.co/images/gvcq8QaZ4Dp8.png?o=1)
+
+    
+## Authors
+
+- [@seizaku](https://www.github.com/seizaku)
+
+
+## License
+
+[MIT](https://choosealicense.com/licenses/mit/)
+
