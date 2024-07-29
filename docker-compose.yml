@@ -22,10 +22,10 @@ services:
   postgrest:
     image: postgrest/postgrest
     ports:
-      - "3333:3000"
+      - "3333:${PGRST_PORT}"
     environment:
-      PGRST_DB_URI: ${POSTGREST_DB_URI}
-      PGRST_DB_SCHEMA: public
-      PGRST_DB_ANON_ROLE: postgres
+      PGRST_DB_URI: ${PGRST_DB_URI}
+      PGRST_DB_SCHEMA: ${PGRST_DB_SCHEMA}
+      PGRST_DB_ROLE: ${PGRST_DB_ROLE}
     depends_on:
       - db
