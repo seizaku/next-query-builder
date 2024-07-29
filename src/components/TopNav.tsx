@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { MixpanelLogo } from "./mixpanel-logo";
+import { MixpanelLogo } from "./MixpanelLogo";
 import { Button, buttonVariants } from "./ui/button";
 import { Input } from "./ui/input";
 import {
