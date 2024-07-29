@@ -34,13 +34,13 @@ FROM users
 JOIN profiles ON users.id = profiles.user_id;
 
 -- Create query function
-CREATE OR REPLACE FUNCTION query(sql TEXT DEFAULT '')
+CREATE OR REPLACE FUNCTION query(q TEXT DEFAULT '')
 RETURNS SETOF user_profiles AS $$
 BEGIN
-    IF sql = '' THEN
+    IF q = '' THEN
         RETURN QUERY SELECT * FROM user_profiles;
     ELSE
-        RETURN QUERY EXECUTE 'SELECT * FROM user_profiles WHERE ' || sql;
+        RETURN QUERY EXECUTE 'SELECT * FROM user_profiles WHERE ' || q;
     END IF;
 END;
 $$ LANGUAGE plpgsql;

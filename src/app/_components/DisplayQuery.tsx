@@ -21,6 +21,11 @@ export function Query() {
           )}
         </p>
       </pre>
+      <pre className="mt-4 text-wrap">
+        <p className="mt-2 rounded-xl bg-muted p-4 text-sm">
+          {formatQuery(query as any, "json")}
+        </p>
+      </pre>
     </section>
   );
 }

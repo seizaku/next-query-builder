@@ -1,38 +1,46 @@
 "use client";
-import { useQuery } from "@tanstack/react-query";
-import { getRecords } from "@/server/actions/records";
+import { useEffect } from "react";
+import { useMutation } from "@tanstack/react-query";
+
+import { getRecords } from "@/server/actions/get-records";
 import { DataTable } from "./datatable/DataTable";
 import { columns } from "./datatable/Columns";
 import { QueryBuilderStore } from "@/lib/stores/query-store";
-import { formatQuery, RuleType } from "react-querybuilder";
 import { UserStore } from "@/lib/stores/user-store";
-import { useEffect } from "react";
-import { User, Profile } from "@/types/index";
+import { formatQuery } from "react-querybuilder";
 import { parseRules } from "@/lib/helpers/parse-rules";
+
+import { User, Profile } from "@/types/index";
 
 export function Users({ initialData }: { initialData: Array<User & Profile> }) {
   const { setUserData } = UserStore();
   const { query } = QueryBuilderStore();
 
+  const { isPending, data, mutate } = useMutation({
+    mutationFn: getRecords,
+  });
+
+  useEffect(() => {
+    const formattedQuery = JSON.stringify(
+      formatQuery(parseRules(query as any) as any, {
+        format: "parameterized",
+        paramPrefix: "$",
+        numberedParams: true,
+      }),
+    );
+    mutate(formattedQuery);
+  }, [JSON.stringify(query.rules).length]);
+
+  // Set initial record on first server side fetch
   useEffect(() => {
     setUserData(initialData);
   }, [initialData, setUserData]);
 
-  const { isRefetching, data, refetch } = useQuery({
-    queryKey: ["user_profiles", query],
-    queryFn: async () =>
-      await getRecords(
-        JSON.stringify(
-          formatQuery(parseRules(query) as any as any, {
-            format: "parameterized",
-            paramPrefix: "$",
-            numberedParams: true,
-          }),
-        ),
-      ),
-    initialData,
-    refetchOnWindowFocus: false,
-  });
-
-  return <DataTable isPending={isRefetching} columns={columns} data={data} />;
+  return (
+    <DataTable
+      isPending={isPending}
+      columns={columns}
+      data={data || initialData || []}
+    />
+  );
 }

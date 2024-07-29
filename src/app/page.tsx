@@ -1,7 +1,7 @@
 import { CustomQueryBuilder } from "./_components/query-builder/QueryBuilder";
 import { Query } from "./_components/DisplayQuery";
 import { GroupControl } from "./_components/query-builder/GroupControl";
-import { getRecords } from "@/server/actions/records";
+import { getRecords } from "@/server/actions/get-records";
 import { Users } from "./_components/Users";
 
 export const dynamic = "force-dynamic";

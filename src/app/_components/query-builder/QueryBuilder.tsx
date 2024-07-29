@@ -23,13 +23,12 @@ import { NumberValueEditor } from "./custom-inputs/NumberValueEditor";
 import { TextValueEditor } from "./custom-inputs/TextValueEditor";
 import { fields } from "@/config/fields";
 import { getOperators } from "@/config/operators";
-import { getQueryValue } from "@/lib/helpers/rule-value";
-import { RuleGroupType } from "@/types";
+import { useEffect } from "react";
 
 // Function to render individual rules
 const renderRule = (rule: any, index: number, groupIndex: number) => {
   return (
-    <div key={`field-${index}`} className="flex items-center gap-2">
+    <div key={`field-${index}`} className="flex flex-wrap items-center gap-2">
       {/* Display 'where' for the first rule, otherwise show a combinator */}
       {index == 0 ? (
         <span className="mr-2 w-12 text-end text-sm font-semibold text-muted-foreground">
@@ -50,6 +49,7 @@ const renderRule = (rule: any, index: number, groupIndex: number) => {
 // Main CustomQueryBuilder component
 export function CustomQueryBuilder() {
   const { query, setGroupCombinator } = QueryBuilderStore();
+
   return (
     <>
       {query?.rules.filter(isRuleGroupType).map((rule, groupIndex) => {
