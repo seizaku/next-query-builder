@@ -18,7 +18,7 @@ export function Users({ initialData }: { initialData: Array<User & Profile> }) {
     setUserData(initialData);
   }, [initialData, setUserData]);
 
-  const { isRefetching, isFetched, data, refetch } = useQuery({
+  const { isRefetching, isRefetchError, data, refetch } = useQuery({
     queryKey: ["user_profiles", query],
     queryFn: () =>
       getRecords(formatQuery((parseRules(query) as any) || query, "sql")),
@@ -30,11 +30,13 @@ export function Users({ initialData }: { initialData: Array<User & Profile> }) {
     setRefetchCallback(refetch);
   }, [refetch, setRefetchCallback]);
 
-  useEffect(() => {
-    if (isFetched) {
-      refetch();
-    }
-  }, [query, isFetched, refetch]);
-
-  return <DataTable isPending={isRefetching} columns={columns} data={data} />;
+  return (
+    <DataTable
+      isRefetchError={isRefetchError}
+      isPending={isRefetching}
+      columns={columns}
+      data={data}
+      initialData={initialData}
+    />
+  );
 }
