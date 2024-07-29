@@ -28,7 +28,6 @@ CREATE TABLE profiles (
         REFERENCES users (id)
 );
 
-
 CREATE VIEW user_profiles AS
 SELECT users.*, profiles.*
 FROM users
@@ -41,6 +40,15 @@ BEGIN
     RETURN QUERY EXECUTE 'SELECT * FROM user_profiles WHERE ' || q;
 END;
 $$ LANGUAGE plpgsql;
+
+-- Create the role with login capability and a demo password
+CREATE ROLE "user" LOGIN PASSWORD 'password';
+-- Grant access to the schema
+GRANT USAGE ON SCHEMA public TO "user";
+-- Grant access to all tables in the schema
+GRANT SELECT ON ALL TABLES IN SCHEMA public TO "user";
+-- Optionally grant access to future tables in the schema
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO "user";
 
 -- Seed users
 INSERT INTO users VALUES (1, 'Brionna69@yahoo.com', 'Sue Walsh-Howe', '2023-09-10 14:45:14.848', '2024-01-26 10:23:33.308');
