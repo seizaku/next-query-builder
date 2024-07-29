@@ -30,13 +30,5 @@ export function Users({ initialData }: { initialData: Array<User & Profile> }) {
     setRefetchCallback(refetch);
   }, [refetch, setRefetchCallback]);
 
-  return (
-    <DataTable
-      isRefetchError={isRefetchError}
-      isPending={isRefetching}
-      columns={columns}
-      data={data}
-      initialData={initialData}
-    />
-  );
+  return <DataTable isPending={isRefetching} columns={columns} data={data} />;
 }
