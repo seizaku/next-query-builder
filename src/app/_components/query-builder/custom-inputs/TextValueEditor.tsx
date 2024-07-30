@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 import { MagnifyingGlassIcon } from "@radix-ui/react-icons";
 import { useEffect, useState } from "react";
 import { RuleType } from "react-querybuilder";
-import { getQueryValue } from "@/lib/helpers/rule-value";
+import { getRuleValue } from "@/lib/helpers/rules";
 
 export function TextValueEditor({
   rule,
@@ -77,7 +77,7 @@ export function TextValueEditor({
             display,
           )}
         >
-          {getQueryValue(query, groupIndex)?.join(", ") ?? "Select values"}
+          {getRuleValue(query, groupIndex)?.join(", ") ?? "Select values"}
         </Button>
       </PopoverTrigger>
       <PopoverContent
