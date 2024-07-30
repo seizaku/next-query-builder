@@ -15,7 +15,7 @@ interface Rule {
 // Combponent for individual rules
 export function Rule({ rule, index, groupIndex }: Rule) {
   return (
-    <div className="flex flex-wrap items-center gap-2">
+    <div className="grid w-full grid-cols-1 items-center gap-2 sm:flex sm:flex-wrap">
       {/* Display 'where' for the first rule, otherwise show a combinator */}
       {index == 0 ? (
         <span className="mr-2 w-12 text-end text-sm font-semibold text-muted-foreground">
