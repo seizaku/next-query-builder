@@ -8,7 +8,7 @@ import { columns } from "./datatable/Columns";
 import { QueryBuilderStore } from "@/lib/stores/query-store";
 import { UserStore } from "@/lib/stores/user-store";
 import { formatQuery, RuleType } from "react-querybuilder";
-import { parseRules } from "@/lib/helpers/parse-rules";
+import { parseRules } from "@/lib/helpers/rules";
 
 import { User, Profile } from "@/types/index";
 

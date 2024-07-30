@@ -32,7 +32,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { getQueryValue } from "@/lib/helpers/rule-value";
+import { getRuleValue } from "@/lib/helpers/rules";
 
 export function DateValueEditor({
   rule,
@@ -66,7 +66,7 @@ export function DateValueEditor({
           )}
         >
           <CalendarIcon className="mr-2 h-4 w-4" />
-          {getQueryValue(query, groupIndex) || "Pick a Date"}
+          {getRuleValue(query, groupIndex) || "Pick a Date"}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="start">
@@ -199,9 +199,9 @@ export function DateRangeValueEditor({
             )}
           >
             <CalendarIcon className="mr-2 h-4 w-4" />
-            {getQueryValue(query, groupIndex)?.includes(",")
-              ? getQueryValue(query, groupIndex)?.split(",").join(" - ")
-              : getQueryValue(query, groupIndex) || "Pick a Date"}
+            {getRuleValue(query, groupIndex)?.includes(",")
+              ? getRuleValue(query, groupIndex)?.split(",").join(" - ")
+              : getRuleValue(query, groupIndex) || "Pick a Date"}
           </Button>
         </PopoverTrigger>
         <PopoverContent

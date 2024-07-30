@@ -11,15 +11,10 @@ export async function getRecords(query?: string): Promise<(User & Profile)[]> {
   try {
     let parsedQuery: QueryObject = { sql: '', params: [] };
     if (query) {
-      try {
-        parsedQuery = JSON.parse(query);
-      } catch (parseError) {
-        console.error('Failed to parse query:', parseError);
-        return [];
-      }
+      parsedQuery = JSON.parse(query);
     }
     
-    const sanitizedQuery = sanitize.format(parsedQuery?.sql, [...parsedQuery?.params]);
+    const sanitizedQuery = sanitize.format(parsedQuery.sql, parsedQuery.params);
 
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/rpc/query`, {
       method: "POST",
@@ -30,19 +25,13 @@ export async function getRecords(query?: string): Promise<(User & Profile)[]> {
     });
 
     if (!res.ok) {
+      console.error('Failed to fetch records:', res.statusText);
       return [];
     }
     
-    const data = await res.json();
-
-    if (typeof data === 'object' && data !== null) {
-      return data;
-    } else {
-      console.error('Invalid JSON response:', data);
-      return [];
-    }
-
+    return await res.json();
   } catch (error) {
+    console.error('Error fetching records:', error);
     return [];
   }
 }
