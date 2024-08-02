@@ -4,18 +4,6 @@ This repository contains a Next.js project featuring a custom query builder. It 
 
 You can see a live demo at https://seizaku-query-builder.vercel.app/
 
-## Table of Contents
-
-- [Next.js Custom Query Builder](#nextjs-custom-query-builder)
-- [Project Structure](#project-structure)
-- [Usage](#usage)
-- [Environment Variables](#environment-variables)
-- [Installation](#installation)
-- [Docker Compose](#docker-compose)
-- [Screenshots](#screenshots)
-- [Authors](#authors)
-- [License](#license)
-
 ## Project Structure
    ```
    .
@@ -70,11 +58,72 @@ You can see a live demo at https://seizaku-query-builder.vercel.app/
 | File/Folder                | Description                                                                                           |
 |----------------------------|-------------------------------------------------------------------------------------------------------|
 | **`fields-config.ts`**     | Maps and configures database fields for the query builder. Update to modify or add fields.|
-| **`panel-tabs.tsx`**             | Organizes fields from `fields-config.ts` into tabs for the rule panel.                                                  |
+| **`panel-tabs.tsx`**             | Defines and organizes fields into tabs for the rule panel.                                                  |
+| **`init.sql`**             | Defines and populates the PostgreSQL database.                                                  |
 
-## Environment Variables
+`init.sql`
+   ``` sql
+-- Create view
+CREATE VIEW user_profiles AS
+SELECT users.*, profiles.*
+FROM users
+JOIN profiles ON users.id = profiles.user_id;
 
-To run this project, you will need to copy paste the variables from .env.example to your .env file
+-- Create RPC function
+CREATE OR REPLACE FUNCTION query(q TEXT DEFAULT '')
+RETURNS SETOF user_profiles AS $$
+BEGIN
+    IF q = '' THEN
+        RETURN QUERY SELECT * FROM user_profiles;
+    ELSE
+        RETURN QUERY EXECUTE 'SELECT * FROM user_profiles WHERE ' || q;
+    END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Create the role with login capability and a demo password
+CREATE ROLE "user" LOGIN PASSWORD 'password';
+-- Grant access to the schema
+GRANT USAGE ON SCHEMA public TO "user";
+-- Grant access to all tables in the schema
+GRANT SELECT ON ALL TABLES IN SCHEMA public TO "user";
+-- Optionally grant access to future tables in the schema
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO "user";
+```
+
+`fetch-records.ts`
+   ``` javascript
+export async function fetchRecords(query?: string): Promise<(User & Profile)[]> {
+  try {
+    let parsedQuery: QueryObject = { sql: '', params: [] };
+    if (query) {
+      parsedQuery = JSON.parse(query);
+    }
+    
+    const sanitizedQuery = sanitize.format(parsedQuery.sql, parsedQuery.params);
+
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/rpc/query`, {
+      cache: 'no-cache',
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ q: sanitizedQuery }),
+    });
+
+    if (!res.ok) {
+      console.error('Failed to fetch records:', res.statusText);
+      return [];
+    }
+    
+    return await res.json();
+  } catch (error) {
+    console.error('Error fetching records:', error);
+    return [];
+  }
+}
+
+```
 
 ## Installation
 
@@ -100,6 +149,10 @@ Run the Development Server
    ```sh
    docker-compose up -d
 ```
+
+## Environment Variables
+
+To run this project, you will need to copy paste the variables from .env.example to your .env file
 
 ## Screenshots
 
