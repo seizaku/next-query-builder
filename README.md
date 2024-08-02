@@ -4,6 +4,18 @@ This repository contains a Next.js project featuring a custom query builder. It 
 
 You can see a live demo at https://seizaku-query-builder.vercel.app/
 
+## Table of Contents
+
+- [Next.js Custom Query Builder](#nextjs-custom-query-builder)
+- [Project Structure](#project-structure)
+- [Usage](#usage)
+- [Environment Variables](#environment-variables)
+- [Installation](#installation)
+- [Docker Compose](#docker-compose)
+- [Screenshots](#screenshots)
+- [Authors](#authors)
+- [License](#license)
+
 ## Project Structure
    ```
    .
@@ -60,6 +72,10 @@ You can see a live demo at https://seizaku-query-builder.vercel.app/
 | **`fields-config.ts`**     | Maps and configures database fields for the query builder. Update to modify or add fields.|
 | **`panel-tabs.tsx`**             | Defines and organizes fields into tabs for the rule panel.                                                  |
 
+## Environment Variables
+
+To run this project, you will need to copy paste the variables from .env.example to your .env file
+
 ## Installation
 
 To get a local copy up and running, follow these simple steps:
@@ -84,10 +100,6 @@ Run the Development Server
    ```sh
    docker-compose up -d
 ```
-
-## Environment Variables
-
-To run this project, you will need to copy paste the variables from .env.example to your .env file
 
 ## Screenshots
 
