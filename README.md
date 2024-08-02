@@ -4,6 +4,62 @@ This repository contains a Next.js project featuring a custom query builder. It 
 
 You can see a live demo at https://seizaku-query-builder.vercel.app/
 
+## Project Structure
+   ```
+   .
+   ├── postgres
+   │   └── init.sql
+   ├── src
+   │   ├── app
+   │   │   ├── favicon.ico
+   │   │   ├── layout.tsx
+   │   │   └── page.tsx
+   │   │
+   │   ├── components
+   │   │   ├── query-builder
+   │   │   │   ├── rules
+   │   │   │   │   ├── editor 
+   │   │   │   │   │   ├── date-field.tsx
+   │   │   │   │   │   ├── date-range-field.tsx
+   │   │   │   │   │   ├── number-field.tsx
+   │   │   │   │   │   ├── number-range-field.tsx
+   │   │   │   │   │   └── text-field.tsx
+   │   │   │   │   │
+   │   │   │   │   ├── rule-combinator.tsx
+   │   │   │   │   ├── rule-delete.tsx
+   │   │   │   │   ├── rule-group-actions.tsx
+   │   │   │   │   ├── rule-operator.tsx
+   │   │   │   │   ├── rule-panel.tsx
+   │   │   │   │   ├── rule-value.tsx
+   │   │   │   │   └── rule.tsx
+   │   │   │   │
+   │   │   │   ├── fields-config.ts
+   │   │   │   ├── operators.ts
+   │   │   │   ├── query-builder.tsx
+   │   │   │   └── panel-tabs.tsx
+   │   │   │
+   │   │   └── records.tsx
+   │   │
+   │   ├── lib
+   │   │   └── stores
+   │   │       ├── query-store.ts
+   │   │       └── user-store.ts     
+   │   └── server
+   │       └── actions
+   │           └── fetch-records.ts 
+   │               
+   │  
+   ├── .env.example
+   └── docker-compose.yml
+```
+
+### Usage
+
+| File/Folder                | Description                                                                                           |
+|----------------------------|-------------------------------------------------------------------------------------------------------|
+| **`fields-config.ts`**     | Maps database fields for the query builder. Update this file to modify or extend the fields available in the query builder. |
+| **`panel-tabs.tsx`**             | Fields grouped into tabs for the rule panel to use.                                                  |
+
 ## Installation
 
 To get a local copy up and running, follow these simple steps:
@@ -31,31 +87,7 @@ Run the Development Server
 
 ## Environment Variables
 
-To run this project, you will need to add the following environment variables to your .env file
-
-```env
-Local Environment:
-
-# PostgreSQL database password
-POSTGRES_PASSWORD='password'
-
-# PGAdmin credentials
-PGADMIN_DEFAULT_EMAIL='postgres@pgadmin.com'
-PGADMIN_DEFAULT_PASSWORD='postgres'
-
-# PostgREST URL to be used by Next.js
-POSTGREST_URL='http://127.0.0.1:8080'
-
-# PostgREST config
-PGRST_DB_URI="postgres://postgres:password@db:5432/postgres"
-PGRST_DB_SCHEMA="public"
-PGRST_DB_ANON_ROLE="user"
-PORT=8080
-
-# NextJS API URL
-NEXT_PUBLIC_API_URL=http://localhost:3000
-
-```
+To run this project, you will need to copy paste the variables from .env.example to your .env file
 
 ## Screenshots
 
