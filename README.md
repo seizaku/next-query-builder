@@ -61,35 +61,6 @@ You can see a live demo at https://seizaku-query-builder.vercel.app/
 | **`panel-tabs.tsx`**             | Defines and organizes fields into tabs for the rule panel.                                                  |
 | **`init.sql`**             | Defines and populates the PostgreSQL database.                                                  |
 
-`init.sql`
-   ``` sql
--- Create view
-CREATE VIEW user_profiles AS
-SELECT users.*, profiles.*
-FROM users
-JOIN profiles ON users.id = profiles.user_id;
-
--- Create RPC function
-CREATE OR REPLACE FUNCTION query(q TEXT DEFAULT '')
-RETURNS SETOF user_profiles AS $$
-BEGIN
-    IF q = '' THEN
-        RETURN QUERY SELECT * FROM user_profiles;
-    ELSE
-        RETURN QUERY EXECUTE 'SELECT * FROM user_profiles WHERE ' || q;
-    END IF;
-END;
-$$ LANGUAGE plpgsql;
-
--- Create the role with login capability and a demo password
-CREATE ROLE "user" LOGIN PASSWORD 'password';
--- Grant access to the schema
-GRANT USAGE ON SCHEMA public TO "user";
--- Grant access to all tables in the schema
-GRANT SELECT ON ALL TABLES IN SCHEMA public TO "user";
--- Optionally grant access to future tables in the schema
-ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO "user";
-```
 
 `fetch-records.ts`
    ``` javascript
@@ -122,7 +93,69 @@ export async function fetchRecords(query?: string): Promise<(User & Profile)[]> 
     return [];
   }
 }
+```
 
+`init.sql`
+
+Define Schema
+   ``` sql
+CREATE TYPE gender AS ENUM ('Male', 'Female');
+
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    name VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE profiles (
+    avatar VARCHAR(255) NOT NULL,
+    company VARCHAR(255) NOT NULL,
+    zip_code VARCHAR(20) NOT NULL,
+    country VARCHAR(255) NOT NULL,
+    state VARCHAR(255) NOT NULL,
+    city VARCHAR(255) NOT NULL,
+    user_id INT UNIQUE NOT NULL,
+    age INT NOT NULL,
+    sex gender NOT NULL,
+    CONSTRAINT fk_user
+        FOREIGN KEY (user_id) 
+        REFERENCES users (id)
+);
+```
+
+Create view
+   ``` sql
+CREATE VIEW user_profiles AS
+SELECT users.*, profiles.*
+FROM users
+JOIN profiles ON users.id = profiles.user_id;
+```
+
+Create RPC function (Sanitized Query Parameter)
+``` sql
+CREATE OR REPLACE FUNCTION query(q TEXT DEFAULT '')
+RETURNS SETOF user_profiles AS $$
+BEGIN
+    IF q = '' THEN
+        RETURN QUERY SELECT * FROM user_profiles;
+    ELSE
+        RETURN QUERY EXECUTE 'SELECT * FROM user_profiles WHERE ' || q;
+    END IF;
+END;
+$$ LANGUAGE plpgsql;
+```
+
+``` sql
+-- Create user role
+CREATE ROLE "user" nologin;
+-- Grant access to the schema
+GRANT USAGE ON SCHEMA public TO "user";
+-- Grant access to all tables in the schema
+GRANT SELECT ON ALL TABLES IN SCHEMA public TO "user";
+-- Optionally grant access to future tables in the schema
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO "user";
 ```
 
 ## Installation
