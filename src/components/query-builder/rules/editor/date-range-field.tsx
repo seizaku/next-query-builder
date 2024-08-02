@@ -20,8 +20,6 @@ import {
   subWeeks,
 } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
-import { RuleType } from "react-querybuilder";
-
 import { QueryBuilderStore } from "@/lib/stores/query-store";
 import { DateRange } from "react-day-picker";
 import { Select } from "@radix-ui/react-select";
@@ -33,59 +31,13 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { getRuleValue } from "@/lib/helpers/rules";
+import { RuleGroupType } from "@/types";
 
-export function DateValueEditor({
+export function DateRangeField({
   rule,
   groupIndex,
 }: {
-  rule: RuleType;
-  groupIndex: number[];
-}) {
-  const { query, setRuleValue } = QueryBuilderStore();
-  const [date, setDate] = useState<Date>(new Date());
-
-  useEffect(() => {
-    if (date) {
-      setRuleValue(
-        addDays(date, 1)
-          .toISOString()
-          .slice(0, date.toISOString().indexOf("T")),
-        groupIndex,
-      );
-    }
-  }, [date]);
-
-  return (
-    <Popover>
-      <PopoverTrigger asChild>
-        <Button
-          variant={"outline"}
-          className={cn(
-            "w-[240px] justify-start text-left font-normal",
-            !date && "text-muted-foreground",
-          )}
-        >
-          <CalendarIcon className="mr-2 h-4 w-4" />
-          {getRuleValue(query, groupIndex) || "Pick a Date"}
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-auto p-0" align="start">
-        <Calendar
-          mode="single"
-          selected={date}
-          onSelect={(value) => setDate(value!)}
-          initialFocus
-        />
-      </PopoverContent>
-    </Popover>
-  );
-}
-
-export function DateRangeValueEditor({
-  rule,
-  groupIndex,
-}: {
-  rule: RuleType;
+  rule: RuleGroupType;
   groupIndex: number[];
 }) {
   const { query, setRuleValue } = QueryBuilderStore();
@@ -182,9 +134,9 @@ export function DateRangeValueEditor({
     updateDate();
   }, []);
 
-  const isBetween = ["between", "notBetween"].includes(rule.operator);
-  const isLast = ["last", "notLast", "beforeLast"].includes(rule.operator);
-  const isNext = ["next"].includes(rule.operator);
+  const isBetween = ["between", "notBetween"].includes(rule.operator!);
+  const isLast = ["last", "notLast", "beforeLast"].includes(rule.operator!);
+  const isNext = ["next"].includes(rule.operator!);
 
   return (
     <div className={cn("grid gap-2")}>

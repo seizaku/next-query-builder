@@ -1,9 +1,10 @@
+"use client";
 import { Input } from "@/components/ui/input";
 import { getRuleValue } from "@/lib/helpers/rules";
 import { QueryBuilderStore } from "@/lib/stores/query-store";
 import { useEffect, useState } from "react";
 
-export function NumberValueEditor({ groupIndex }: { groupIndex: number[] }) {
+export function RangedNumberField({ groupIndex }: { groupIndex: number[] }) {
   const { query, setRuleValue } = QueryBuilderStore();
   const [from, setFrom] = useState(0);
   const [to, setTo] = useState(0);

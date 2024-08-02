@@ -15,20 +15,39 @@ import {
 } from "@radix-ui/react-icons";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { RuleType } from "react-querybuilder";
-import { fields } from "@/config/fields";
-import { tabs } from "@/config/tabs";
 import { cn } from "@/lib/utils";
 import { QueryBuilderStore } from "@/lib/stores/query-store";
+import { RuleGroupType } from "@/types";
+import { fields } from "@/components";
 import { useState, useMemo } from "react";
+import { Pencil1Icon, PersonIcon } from "@radix-ui/react-icons";
 
-export const FieldSelectorPopover = ({
-  rule,
-  groupIndex,
-}: {
-  rule?: RuleType;
+export type Tab = {
+  name: string;
+  value: string;
+  icon?: React.ReactNode;
+};
+
+export const tabs: Tab[] = [
+  { name: "All", value: "*" },
+  {
+    name: "User",
+    value: "user",
+    icon: <PersonIcon className="mr-2 h-3" />,
+  },
+  {
+    name: "Profile",
+    value: "profile",
+    icon: <Pencil1Icon className="mr-2 h-3" />,
+  },
+];
+
+interface RulePanelProps {
+  rule?: RuleGroupType;
   groupIndex: number[];
-}) => {
+}
+
+export const RulePanel = ({ rule, groupIndex }: RulePanelProps) => {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [currentTab, setCurrentTab] = useState(tabs[0]);
@@ -39,15 +58,14 @@ export const FieldSelectorPopover = ({
     [rule?.field],
   );
 
-  const handleTabClick = (tab: (typeof tabs)[0]) => setCurrentTab(tab);
+  const handleTabClick = (tab: Tab) => setCurrentTab(tab);
 
   const filteredFields = useMemo(() => {
     return fields.filter((item) => {
-      if (currentTab.value == "*") {
+      if (currentTab.value === "*") {
         return item.name.toLowerCase().includes(search.toLowerCase());
       }
-
-      return item.tab == currentTab.value;
+      return item.tab === currentTab.value;
     });
   }, [currentTab.value, search]);
 
@@ -97,19 +115,15 @@ export const FieldSelectorPopover = ({
         </div>
         <div className="divided-x mt-4 flex">
           <div className="min-w-28">
-            {tabs.map((category) => (
+            {tabs.map((tab) => (
               <Button
-                key={category.name}
-                variant={
-                  currentTab.name === category.name ? "secondary" : "ghost"
-                }
+                key={tab.name}
+                variant={currentTab.name === tab.name ? "secondary" : "ghost"}
                 className="w-full justify-start text-xs font-semibold"
-                onClick={() => handleTabClick(category)}
+                onClick={() => handleTabClick(tab)}
               >
-                {category.icon ?? (
-                  <LetterCaseCapitalizeIcon className="mr-2 h-3" />
-                )}
-                {category.name.charAt(0).toUpperCase() + category.name.slice(1)}
+                {tab.icon ?? <LetterCaseCapitalizeIcon className="mr-2 h-3" />}
+                {tab.name.charAt(0).toUpperCase() + tab.name.slice(1)}
               </Button>
             ))}
           </div>
@@ -127,7 +141,7 @@ export const FieldSelectorPopover = ({
                       }
                       setOpen(false);
                     }}
-                    variant={"ghost"}
+                    variant="ghost"
                     className="w-full justify-start text-xs font-medium"
                   >
                     {renderIcon(recentField.datatype as string)}
@@ -148,6 +162,7 @@ export const FieldSelectorPopover = ({
               <div className="py-2">
                 {filteredFields.map((item) => (
                   <Button
+                    key={`filter-item-${item.name}`}
                     onClick={() => {
                       if (rule) {
                         setRuleField(item.name, groupIndex);
@@ -156,8 +171,7 @@ export const FieldSelectorPopover = ({
                       }
                       setOpen(false);
                     }}
-                    key={`filter-item-${item.name}`}
-                    variant={"ghost"}
+                    variant="ghost"
                     className={cn(
                       "w-full justify-start text-xs font-semibold",
                       field?.name === item.name ? "bg-muted" : "",

@@ -1,14 +1,12 @@
-import { RuleType } from "react-querybuilder";
-import { FieldSelectorPopover } from "./FieldSelectorPopover";
-import {
-  RuleCombinator,
-  RuleDeleteButton,
-  RuleInputValue,
-  RuleOperators,
-} from "./QueryBuilder";
+import { RulePanel } from "./rule-panel";
+import { RuleCombinator } from "./rule-combinator";
+import { RuleOperator } from "./rule-operator";
+import { RuleValue } from "./rule-value";
+import { RuleDelete } from "./rule-delete";
+import { RuleGroupType } from "@/types";
 
 interface Rule {
-  rule: RuleType;
+  rule: RuleGroupType;
   index: number;
   groupIndex: number;
 }
@@ -26,10 +24,10 @@ export function Rule({ rule, index, groupIndex }: Rule) {
       )}
 
       {/* Render field selector popover, operators, input value, and delete button */}
-      <FieldSelectorPopover rule={rule} groupIndex={[groupIndex, index]} />
-      <RuleOperators rule={rule} groupIndex={[groupIndex, index]} />
-      <RuleInputValue rule={rule} groupIndex={[groupIndex, index]} />
-      <RuleDeleteButton groupIndex={[groupIndex, index]} />
+      <RulePanel rule={rule} groupIndex={[groupIndex, index]} />
+      <RuleOperator rule={rule} groupIndex={[groupIndex, index]} />
+      <RuleValue rule={rule} groupIndex={[groupIndex, index]} />
+      <RuleDelete groupIndex={[groupIndex, index]} />
     </div>
   );
 }

@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { QueryBuilderStore } from "@/lib/stores/query-store";
 import { PlusIcon } from "@radix-ui/react-icons";
 
-export function GroupControl() {
+export function RuleGroupActions() {
   const { query, addGroup, clearAll } = QueryBuilderStore();
   return (
     <section className="flex w-full justify-start gap-2 py-2">

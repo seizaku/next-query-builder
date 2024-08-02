@@ -1,26 +1,22 @@
-import { CustomQueryBuilder } from "./_components/query-builder/QueryBuilder";
-import { GroupControl } from "./_components/query-builder/GroupControl";
-import { getRecords } from "@/server/actions/get-records";
-import { Users } from "./_components/Users";
+import { QueryBuilder, RuleGroupActions, Records } from "@/components";
+import { fetchRecords } from "@/server/actions/fetch-records";
 
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
-  const data = await getRecords();
+  const data = await fetchRecords();
 
   return (
-    <main className="min-h-screen p-8 sm:px-24">
+    <main className="grid min-h-screen grid-cols-1 gap-4 p-8 sm:px-24">
       <section>
         <h1 className="py-2 text-xl font-bold">Users</h1>
         <h6 className="mb-4 text-xs font-medium text-muted-foreground">
           {data.length} Users
         </h6>
-        <CustomQueryBuilder />
+        <QueryBuilder />
       </section>
-      <GroupControl />
-      <section className="mt-6">
-        <Users initialData={data} />
-      </section>
+      <RuleGroupActions />
+      <Records initialData={data} />
     </main>
   );
 }

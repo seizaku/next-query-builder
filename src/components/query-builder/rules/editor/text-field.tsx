@@ -1,3 +1,4 @@
+"use client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -12,14 +13,14 @@ import { UserStore } from "@/lib/stores/user-store";
 import { cn } from "@/lib/utils";
 import { MagnifyingGlassIcon } from "@radix-ui/react-icons";
 import { useEffect, useState } from "react";
-import { RuleType } from "react-querybuilder";
 import { getRuleValue } from "@/lib/helpers/rules";
+import { RuleGroupType } from "@/types";
 
-export function TextValueEditor({
+export function TextField({
   rule,
   groupIndex,
 }: {
-  rule: RuleType;
+  rule: RuleGroupType;
   groupIndex: number[];
 }) {
   const [selectedValues, setSelectedValues] = useState<string[]>([]);
@@ -33,7 +34,7 @@ export function TextValueEditor({
     if (typeof item === "string") {
       newValue = item;
     } else {
-      newValue = item[rule.field]?.toString();
+      newValue = item[rule.field!]?.toString();
     }
 
     // Toggle selection
@@ -45,7 +46,7 @@ export function TextValueEditor({
   }
 
   const data = users?.filter((item: any) => {
-    return item[rule.field]?.toLowerCase()?.includes(search?.toLowerCase());
+    return item[rule.field!]?.toLowerCase()?.includes(search?.toLowerCase());
   });
 
   function applySelection() {
@@ -132,11 +133,11 @@ export function TextValueEditor({
                     >
                       <Checkbox
                         checked={selectedValues.includes(
-                          item[rule.field]?.toString() || "",
+                          item[rule.field!]?.toString() || "",
                         )}
                         onCheckedChange={() => handleSelect(item)}
                       />
-                      <span className="ml-2">{item[rule.field]}</span>
+                      <span className="ml-2">{item[rule.field!]}</span>
                     </Button>
                   ))}
                   {!data?.length && (

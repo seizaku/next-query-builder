@@ -1,3 +1,4 @@
+"use client";
 import {
   ColumnDef,
   flexRender,
@@ -18,7 +19,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import { TableLoadingSkeleton } from "./Skeleton";
+import { DataTableSkeleton } from "./data-table-skeleton";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -68,7 +69,7 @@ export function DataTable<TData, TValue>({
           </TableHeader>
           <TableBody>
             {isPending ? (
-              <TableLoadingSkeleton />
+              <DataTableSkeleton />
             ) : table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow

@@ -1,4 +1,3 @@
-import { RuleType } from "react-querybuilder";
 
 export type User = {
   id: number;
@@ -22,7 +21,10 @@ export type Profile = {
 };
 
 export type RuleGroupType = {
+  field?: string;
+  operator?: string;
+  value?: any;
   combinator?: "and" | "or";
-  rules: Array<RuleType | RuleGroupType>;
+  rules?: RuleGroupType[];
   groupCombinator?: "and" | "or";
 };

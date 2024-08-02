@@ -1,7 +1,7 @@
 import { RuleGroupType } from "@/types";
-import { isRuleGroupType, isRuleType } from "../stores/query-store";
+import { isRuleGroupType } from "../stores/query-store";
 import { RuleType } from "react-querybuilder";
-import { customOperators } from "@/config/operators";
+import { customOperators } from "@/components/query-builder/operators";
 
 export const getRuleValue = (
   query: any,
@@ -9,7 +9,7 @@ export const getRuleValue = (
 ) => {
   if (
     isRuleGroupType(query?.rules[groupIndex[0]]) &&
-    ((query?.rules[groupIndex[0]] as RuleGroupType).rules[groupIndex[1]] as RuleType)?.value
+    ((query?.rules[groupIndex[0]] as RuleGroupType).rules?.[groupIndex[1]] as RuleType)?.value
   ) {
     return query.rules[groupIndex[0]].rules[groupIndex[1]]?.value;
   }
@@ -19,7 +19,7 @@ export const getRuleValue = (
 
 // Parse and transform query rules
 export function parseRules(query: RuleGroupType): RuleGroupType {
-  const updatedRules = insertGroupCombinators(updateDateOperators(query.rules));
+  const updatedRules = insertGroupCombinators(updateDateOperators(query.rules!));
   return { ...query, rules: updatedRules };
 }
 
@@ -27,7 +27,7 @@ export function parseRules(query: RuleGroupType): RuleGroupType {
 const updateDateOperators = (rules: (RuleGroupType | RuleType)[]): (RuleGroupType | RuleType)[] => {
   return rules.map((item) => {
     if ('rules' in item) {
-      return { ...item, rules: updateDateOperators(item.rules) };
+      return { ...item, rules: updateDateOperators(item.rules!) };
     }
     if (
       'operator' in item &&

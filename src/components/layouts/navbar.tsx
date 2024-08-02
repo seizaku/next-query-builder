@@ -1,31 +1,16 @@
-"use client";
 import Link from "next/link";
-import { MixpanelLogo } from "./MixpanelLogo";
-import { Button, buttonVariants } from "./ui/button";
-import { Input } from "./ui/input";
-import {
-  GearIcon,
-  MagnifyingGlassIcon,
-  MixIcon,
-  MoonIcon,
-  SunIcon,
-} from "@radix-ui/react-icons";
-import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
+import { MixpanelLogo } from "@/components/mixpanel-logo";
+import { buttonVariants } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { GearIcon, MagnifyingGlassIcon, MixIcon } from "@radix-ui/react-icons";
+import { ModeToggle } from "@/components";
 
 export function Navbar() {
-  const { theme, setTheme } = useTheme();
-  const [currentTheme, setCurrentTheme] = useState(theme);
-
-  useEffect(() => {
-    setTheme(currentTheme == "light" ? "dark" : "light");
-  }, [currentTheme, setTheme]);
-
   return (
-    <nav className="sticky left-0 top-0 z-50 flex h-16 w-full items-center border-b bg-background">
-      <div className="flex h-full w-full items-center justify-between gap-8 px-8">
+    <header className="sticky left-0 top-0 z-50 flex h-16 w-full items-center border-b bg-background">
+      <nav className="flex h-full w-full items-center justify-between gap-8 px-8">
         <div className="flex items-center gap-8">
-          <MixpanelLogo mode={currentTheme!} />
+          <MixpanelLogo />
           <ul className="hidden items-center gap-2 md:flex">
             <li>
               <Link href={"/"} className={buttonVariants({ variant: "ghost" })}>
@@ -58,19 +43,7 @@ export function Navbar() {
             </Link>
           </li>
           <li>
-            <Button
-              onClick={() =>
-                setCurrentTheme(currentTheme == "light" ? "dark" : "light")
-              }
-              variant={"ghost"}
-              size={"icon"}
-            >
-              {theme == "light" ? (
-                <SunIcon className="h-5 w-5" />
-              ) : (
-                <MoonIcon className="h-5 w-5" />
-              )}
-            </Button>
+            <ModeToggle />
           </li>
           <li>
             <Link
@@ -89,7 +62,7 @@ export function Navbar() {
             </Link>
           </li>
         </ul>
-      </div>
-    </nav>
+      </nav>
+    </header>
   );
 }

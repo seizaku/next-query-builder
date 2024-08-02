@@ -7,7 +7,7 @@ interface QueryObject {
   params: any[];
 }
 
-export async function getRecords(query?: string): Promise<(User & Profile)[]> {
+export async function fetchRecords(query?: string): Promise<(User & Profile)[]> {
   try {
     let parsedQuery: QueryObject = { sql: '', params: [] };
     if (query) {

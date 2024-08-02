@@ -1,7 +1,7 @@
 "use client"
 
 import { defaultOperators } from "react-querybuilder";
-import { fields } from "@/config/fields";
+import { fields } from "@/components/query-builder/fields-config";
 
 
 export const customOperators = {

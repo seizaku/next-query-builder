@@ -1,23 +1,26 @@
 "use client";
 import { useEffect } from "react";
 import { useMutation } from "@tanstack/react-query";
-
-import { getRecords } from "@/server/actions/get-records";
-import { DataTable } from "./datatable/DataTable";
-import { columns } from "./datatable/Columns";
+import { fetchRecords } from "@/server/actions/fetch-records";
+import { DataTable } from "@/components/tables/data-table";
+import { columns } from "./tables/data-table-columns";
 import { QueryBuilderStore } from "@/lib/stores/query-store";
 import { UserStore } from "@/lib/stores/user-store";
-import { formatQuery, RuleType } from "react-querybuilder";
+import { formatQuery } from "react-querybuilder";
 import { parseRules } from "@/lib/helpers/rules";
 
 import { User, Profile } from "@/types/index";
 
-export function Users({ initialData }: { initialData: Array<User & Profile> }) {
+export function Records({
+  initialData,
+}: {
+  initialData: Array<User & Profile>;
+}) {
   const { setUserData } = UserStore();
   const { query } = QueryBuilderStore();
 
   const { isPending, data, mutate } = useMutation({
-    mutationFn: getRecords,
+    mutationFn: fetchRecords,
   });
 
   const refetch = () => {
