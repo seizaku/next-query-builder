@@ -43,7 +43,7 @@ You can see a live demo at https://seizaku-query-builder.vercel.app/
    │   ├── lib
    │   │   └── stores
    │   │       ├── query-store.ts
-   │   │       └── user-store.ts     
+   │   │       └── record-store.ts     
    │   └── server
    │       └── actions
    │           └── fetch-records.ts 
