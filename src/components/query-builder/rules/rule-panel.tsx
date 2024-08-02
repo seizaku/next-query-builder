@@ -20,7 +20,7 @@ import { QueryBuilderStore } from "@/lib/stores/query-store";
 import { RuleGroupType } from "@/types";
 import { fields } from "@/components";
 import { useState, useMemo } from "react";
-import { Tab, tabs } from "@/components/query-builder/tabs";
+import { Tab, tabs } from "@/components/query-builder/panel-tabs";
 
 interface RulePanelProps {
   rule?: RuleGroupType;
