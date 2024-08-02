@@ -17,6 +17,7 @@ export async function fetchRecords(query?: string): Promise<(User & Profile)[]> 
     const sanitizedQuery = sanitize.format(parsedQuery.sql, parsedQuery.params);
 
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/rpc/query`, {
+      cache: 'no-cache',
       method: "POST",
       headers: {
         "Content-Type": "application/json",

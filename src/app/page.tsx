@@ -1,8 +1,6 @@
 import { QueryBuilder, RuleGroupActions, Records } from "@/components";
 import { fetchRecords } from "@/server/actions/fetch-records";
 
-export const dynamic = "force-dynamic";
-
 export default async function Home() {
   const data = await fetchRecords();
 

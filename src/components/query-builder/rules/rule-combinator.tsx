@@ -11,7 +11,6 @@ import { QueryBuilderStore } from "@/lib/stores/query-store";
 import { cn } from "@/lib/utils";
 
 // Component for selecting rule group combinator Ex. ((name = 'John') 'AND' (age = 50))
-
 export function RuleGroupCombinator({
   rule,
   groupIndex,
@@ -21,23 +20,13 @@ export function RuleGroupCombinator({
 }) {
   const { setGroupCombinator } = QueryBuilderStore();
 
-  const getButtonClass = () =>
-    "groupCombinator" in rule && rule.groupCombinator === "or"
-      ? "secondary"
-      : "default";
-
-  const getButtonPositionClass = () =>
-    "groupCombinator" in rule && rule.groupCombinator === "or"
-      ? "-top-12"
-      : "-top-4";
-
   return (
     <>
       {"groupCombinator" in rule && (
         <div
           className={cn(
             "absolute left-0 flex w-full justify-center",
-            getButtonPositionClass(),
+            rule.groupCombinator === "or" ? "-top-12" : "-top-4",
           )}
         >
           <Button
@@ -46,7 +35,7 @@ export function RuleGroupCombinator({
                 groupIndex,
               ])
             }
-            variant={getButtonClass()}
+            variant={rule.groupCombinator === "or" ? "secondary" : "default"}
           >
             {rule.groupCombinator?.toUpperCase()}
           </Button>
@@ -71,8 +60,8 @@ export function RuleCombinator({ groupIndex }: { groupIndex: number[] }) {
         className="w-14 justify-end border-0 text-end text-sm font-semibold text-muted-foreground shadow-none hover:bg-muted"
       >
         <SelectValue
-          placeholder={(query.rules[groupIndex[0]] as any)?.combinator}
-          defaultValue={(query.rules[groupIndex[0]] as any)?.combinator}
+          placeholder={(query.rules![groupIndex[0]] as any)?.combinator}
+          defaultValue={(query.rules![groupIndex[0]] as any)?.combinator}
         />
       </SelectTrigger>
       <SelectContent>

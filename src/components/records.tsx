@@ -32,8 +32,8 @@ export function Records({
           (y.value == "" || y.value == undefined || y.value == null),
       );
 
-    const hasEmptyValues = query.rules.length
-      ? query.rules.some((x) => checkEmptyValues(x))
+    const hasEmptyValues = query.rules!.length
+      ? query.rules!.some((x) => checkEmptyValues(x))
       : true;
 
     if (hasEmptyValues) return;
