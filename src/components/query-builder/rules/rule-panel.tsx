@@ -20,27 +20,7 @@ import { QueryBuilderStore } from "@/lib/stores/query-store";
 import { RuleGroupType } from "@/types";
 import { fields } from "@/components";
 import { useState, useMemo } from "react";
-import { Pencil1Icon, PersonIcon } from "@radix-ui/react-icons";
-
-export type Tab = {
-  name: string;
-  value: string;
-  icon?: React.ReactNode;
-};
-
-export const tabs: Tab[] = [
-  { name: "All", value: "*" },
-  {
-    name: "User",
-    value: "user",
-    icon: <PersonIcon className="mr-2 h-3" />,
-  },
-  {
-    name: "Profile",
-    value: "profile",
-    icon: <Pencil1Icon className="mr-2 h-3" />,
-  },
-];
+import { Tab, tabs } from "@/components/query-builder/tabs";
 
 interface RulePanelProps {
   rule?: RuleGroupType;
