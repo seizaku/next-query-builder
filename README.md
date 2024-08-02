@@ -57,7 +57,7 @@ You can see a live demo at https://seizaku-query-builder.vercel.app/
 
 | File/Folder                | Description                                                                                           |
 |----------------------------|-------------------------------------------------------------------------------------------------------|
-| **`fields-config.ts`**     | Maps database fields for the query builder. Update this file to modify or extend the fields available in the query builder. |
+| **`fields-config.ts`**     | Maps and configures database fields for the query builder. Update to modify or add fields.|
 | **`panel-tabs.tsx`**             | Fields grouped into tabs for the rule panel to use.                                                  |
 
 ## Installation
