@@ -147,6 +147,7 @@ END;
 $$ LANGUAGE plpgsql;
 ```
 
+Prevent user from making changes to the database (SQL Injection)
 ``` sql
 -- Create user role
 CREATE ROLE "user" nologin;
